@@ -1,0 +1,17 @@
+.trains {
+  height: 25vw;
+  overflow-y: scroll;
+  text-align: left;
+  margin: 0 20px;
+  -ms-overflow-style: none;
+}
+
+.trains::-webkit-scrollbar {
+  display: none;
+}
+
+.train-row {
+  height: 100px;
+  border-bottom: 1px solid white;
+  margin-bottom: 10px;
+}

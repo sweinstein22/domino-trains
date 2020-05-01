@@ -1,0 +1,11 @@
+.player-hand {
+  width: 100%;
+}
+
+.domino-section {
+  display: flex;
+  max-width: 100vw;
+  flex-wrap: wrap;
+  margin: 0 30px;
+  justify-content: center;
+}
