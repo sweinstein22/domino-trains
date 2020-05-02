@@ -76,13 +76,13 @@ export class PlayerHand extends React.Component {
     ) {
       const {hand} = this.props;
       const {selectedTiles} = this.state;
-      const tile = hand[id];
-      if (!selectedTiles.includes(tile)) {
+      const domino = hand[id];
+      if (!selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1])) {
         this.setState({
-          selectedTiles: selectedTiles.concat([tile])
+          selectedTiles: selectedTiles.concat([domino])
         });
       } else {
-        selectedTiles.splice(selectedTiles.indexOf(tile), 1);
+        selectedTiles.splice(selectedTiles.findIndex(selected => selected[0] === domino[0] && selected[1] === domino[1]), 1);
         this.setState({selectedTiles});
       }
     }
@@ -91,7 +91,7 @@ export class PlayerHand extends React.Component {
   addToTrain = (trainIndex) => {
     const {addToTrain, hand, view} = this.props;
     const {selectedTiles} = this.state;
-    const newHand = hand.filter(tile => !selectedTiles.includes(tile));
+    const newHand = hand.filter(domino => !selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1]));
     this.setState({selectedTiles: []});
 
     addToTrain({newHand, handIndex: view-1, trainIndex, trainTiles: selectedTiles});
@@ -101,12 +101,13 @@ export class PlayerHand extends React.Component {
     const {view, hand, flipTile, drawTile, players, publicTrains, flipTrainState} = this.props;
     const {selectedTiles} = this.state;
     const handIndex = view-1;
+    const trainIsPublic = publicTrains.some(index => index === handIndex);
     if (view === 0) {
-      return <div className="player-hand">Welcome!</div>
+      return <div className="welcome">Welcome!</div>
     }
 
     const dominos = hand && hand.map((domino, index) => {
-      const tileIsSelected = selectedTiles.includes(domino);
+      const tileIsSelected = selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1]);
       return (
       <span {...{draggable: true, className: "draggable", key: index}}>
         <Domino {...{
@@ -114,7 +115,7 @@ export class PlayerHand extends React.Component {
           flipTile,
           handIndex,
           tileIndex: index,
-          selectedIndex: tileIsSelected ? selectedTiles.indexOf(domino)+1 : null,
+          selectedIndex: tileIsSelected ? selectedTiles.findIndex(selected => selected[0] === domino[0] && selected[1] === domino[1])+1 : null,
           className: tileIsSelected ? 'selected-domino' : ''
         }} />
       </span>
@@ -126,7 +127,7 @@ export class PlayerHand extends React.Component {
         <span className="player-actions">
           <span>
             <button {...{onClick: () => drawTile({handIndex})}}>Draw Tile</button>
-            <button {...{onClick: () => flipTrainState(handIndex)}}>Put train out</button>
+            <button {...{onClick: () => flipTrainState(handIndex)}}>Make Train {trainIsPublic ? 'Public' : 'Private'}</button>
           </span>
             <SubmitForm {...{addToTrain: this.addToTrain, players, publicTrains, handIndex}} />
         </span>

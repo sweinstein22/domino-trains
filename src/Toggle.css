@@ -1,5 +1,7 @@
 .toggle {
-  margin-bottom: 10px;
+  display: flex;
+  margin: 10px 20px;
+  justify-content: space-between;
 }
 
 button.active {

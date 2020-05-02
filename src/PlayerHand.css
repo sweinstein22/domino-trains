@@ -1,23 +1,29 @@
-.player-hand {
+.welcome {
   width: 50%;
   max-height: 90vh;
 }
 
+.player-hand {
+  width: 50%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+}
+
 .hand {
   height: 100%;
-  overflow: scroll;
-
+  overflow: auto;
 }
 
 .player-actions {
   display: flex;
-  justify-content: space-between;
   margin: 10px 40px;
+  justify-content: space-between;
 }
 
 .domino-section {
   display: flex;
-  margin: 0 10px;
+  margin: 70px 10px 0 10px;
   flex-wrap: wrap;
   justify-content: center;
 }

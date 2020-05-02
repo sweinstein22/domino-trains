@@ -1,12 +1,14 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Deploy
+
+Deployed using firebase
+
+if not already installed, run `npm install -g firebase-tools` to install the firebase CLI tools
+
+login with `firebase login`
+run `firebase serve` to serve up the app locally
+run `firebase deploy` to deploy the application
 
 ## Available Scripts
-
-In the project directory, you can run:
-
-### `npm run deploy`
-
-Deploys the app
 
 ### `yarn start`
 
