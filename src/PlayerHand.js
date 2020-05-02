@@ -1,24 +1,55 @@
 import React from 'react';
 import './PlayerHand.css';
 import Domino from "./Domino";
+import SubmitForm from "./SubmitForm";
 
 export class PlayerHand extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      view: this.props.view,
+      selectedTiles: [],
       startingDragIndex: null,
       stoppingDragIndex: null
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.view !== this.props.view) {
+      this.setState({selectedTiles: []});
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener('click', this.selectTile);
+    document.addEventListener('dragenter', this.setDragIndices);
+    document.addEventListener('dragover', this.setDragIndices);
+    document.addEventListener('dragleave', this.setDragIndices);
+    document.addEventListener('dragend', this._onDragEnd);
+    document.addEventListener('drop', this._onDrop);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.selectTile);
+    document.removeEventListener('dragenter', this.setDragIndices);
+    document.removeEventListener('dragover', this.setDragIndices);
+    document.removeEventListener('dragleave', this.setDragIndices);
+    document.removeEventListener('dragend', this._onDragEnd);
+    document.removeEventListener('drop', this._onDrop);
+  }
+
   setDragIndices = (e) => {
     e.preventDefault();
-    if (e.target.className === 'domino') {
+    const {className, id} = e.target;
+    if (!className || typeof className === "object") return;
+    if (className.includes('dot')
+      || className.includes('selectable')
+      || className.includes('right')
+      || className.includes('left')
+    ) {
       const {startingDragIndex} = this.state;
       startingDragIndex === null
-      ? this.setState({startingDragIndex: e.target.id})
-      : this.setState({stoppingDragIndex: e.target.id});
+        ? this.setState({startingDragIndex: id})
+        : this.setState({stoppingDragIndex: id});
     }
   };
 
@@ -35,41 +66,74 @@ export class PlayerHand extends React.Component {
     this.setState({startingDragIndex: null, stoppingDragIndex: null});
   };
 
-  componentDidMount() {
-    document.addEventListener('dragenter', this.setDragIndices);
-    document.addEventListener('dragover', this.setDragIndices);
-    document.addEventListener('dragleave', this.setDragIndices);
-    document.addEventListener('dragend', this._onDragEnd);
-    document.addEventListener('drop', this._onDrop);
-  }
+  selectTile = (e) => {
+    const {className, id} = e.target;
+    if (!className || typeof className === "object") return;
+    if (className.includes('dot')
+      || className.includes('selectable')
+      || className.includes('right')
+      || className.includes('left')
+    ) {
+      const {hand} = this.props;
+      const {selectedTiles} = this.state;
+      const tile = hand[id];
+      if (!selectedTiles.includes(tile)) {
+        this.setState({
+          selectedTiles: selectedTiles.concat([tile])
+        });
+      } else {
+        selectedTiles.splice(selectedTiles.indexOf(tile), 1);
+        this.setState({selectedTiles});
+      }
+    }
+  };
 
-  componentWillUnmount() {
-    document.removeEventListener('dragenter', this.setDragIndices);
-    document.removeEventListener('dragover', this.setDragIndices);
-    document.removeEventListener('dragleave', this.setDragIndices);
-    document.removeEventListener('dragend', this._onDragEnd);
-    document.removeEventListener('drop', this._onDrop);
-  }
+  addToTrain = (trainIndex) => {
+    const {addToTrain, hand, view} = this.props;
+    const {selectedTiles} = this.state;
+    const newHand = hand.filter(tile => !selectedTiles.includes(tile));
+    this.setState({selectedTiles: []});
+
+    addToTrain({newHand, handIndex: view-1, trainIndex, trainTiles: selectedTiles});
+  };
 
   render() {
-    const {view, hand, flipTile, drawTile} = this.props;
+    const {view, hand, flipTile, drawTile, players, publicTrains, flipTrainState} = this.props;
+    const {selectedTiles} = this.state;
+    const handIndex = view-1;
     if (view === 0) {
       return <div className="player-hand">Welcome!</div>
     }
 
-    const dominos = hand && hand.map((domino, index) =>
-      <span {...{draggable: true, className: "domino-draggable", key: index}}>
-        <Domino {...{value: domino, flipTile, handIndex: view-1, tileIndex: index}} />
+    const dominos = hand && hand.map((domino, index) => {
+      const tileIsSelected = selectedTiles.includes(domino);
+      return (
+      <span {...{draggable: true, className: "draggable", key: index}}>
+        <Domino {...{
+          value: domino,
+          flipTile,
+          handIndex,
+          tileIndex: index,
+          selectedIndex: tileIsSelected ? selectedTiles.indexOf(domino)+1 : null,
+          className: tileIsSelected ? 'selected-domino' : ''
+        }} />
       </span>
-    );
+    )});
+
     return (
       <div className="player-hand">
-        <span>
-          <button {...{onClick: () => drawTile({handIndex: view-1})}}>Draw Tile</button>
+        <div className="hand">
+        <span className="player-actions">
+          <span>
+            <button {...{onClick: () => drawTile({handIndex})}}>Draw Tile</button>
+            <button {...{onClick: () => flipTrainState(handIndex)}}>Put train out</button>
+          </span>
+            <SubmitForm {...{addToTrain: this.addToTrain, players, publicTrains, handIndex}} />
         </span>
-        <span className="domino-section">
+          <span className="domino-section">
         {dominos}
         </span>
+        </div>
       </div>
     );
   }

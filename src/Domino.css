@@ -9,7 +9,7 @@
   border-radius: 25px;
 }
 
-.domino-draggable {
+.draggable {
   margin: 10px;
 }
 
@@ -30,7 +30,7 @@
   width: 25px;
   border-radius: 50%;
   display: inline-block;
-  margin: 3px;
+  border: 3px solid #282c34;
 }
 
 .one .dot {
@@ -85,6 +85,19 @@
   height: 20px;
   width: 20px;
   background-color: darkorchid;
+}
+
+.tile-controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.selected-indicator {
+  color: #282c34;
+  padding: 5px 10px;
+  background-color: white;
+  border-radius: 25px;
+  border: 1px solid black;
 }
 
 .rotate-icon {

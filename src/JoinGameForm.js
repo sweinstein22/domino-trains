@@ -1,4 +1,5 @@
 import React from 'react';
+import './JoinGameForm.css';
 
 export class JoinGameForm extends React.Component {
   constructor(props) {

@@ -1,15 +1,26 @@
 import React from 'react';
+import classnames from 'classnames';
+import TrainIcon from '@material-ui/icons/Train';
 import './Trains.css';
 import Domino from "./Domino";
 
 export class Trains extends React.Component {
   displayTrain = (train, index) => {
-    const {players} = this.props;
+    const {players, publicTrains, view} = this.props;
+    const playerIndex = view-1;
+    const isPublic = playerIndex === index || publicTrains.includes(index) || index === players.length;
     return (<div {...{key: index, className: 'train-row'}}>
-      {index === players.length ? `Mexican Train: ` : `${players[index]}:`}
-      {train.map((domino, key) => <Domino {...{key: `${index}-${key}`, value: domino}}/>)}
+      <span {...{className: classnames("train-name", {'public-train': isPublic})}}>
+        <TrainIcon/>
+        {index === players.length ? ` Mexican Train: ` : ` ${players[index]}:`}
+      </span>
+      <span className="train-contents">
+        {train.map((domino, key) =>
+          <Domino {...{key: `${index}-${key}`, value: domino, className: classnames('train-domino')}}/>
+        )}
+      </span>
       <br/>
-      </div>)
+    </div>)
   };
 
   render() {

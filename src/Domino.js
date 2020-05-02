@@ -5,6 +5,7 @@ import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
 export class Domino extends React.Component {
   generateDots = (dotCount) => {
+    const {tileIndex} = this.props;
     const insertBreak = (index) => {
       switch (dotCount) {
         case 4:
@@ -27,7 +28,7 @@ export class Domino extends React.Component {
     return <span>{
       Array.from({length: dotCount}).map((_, index) =>
         <span key={index}>
-          <span className="dot"/>
+          <span {...{className: "dot", id: tileIndex}}/>
           {insertBreak(index) && <br/>}
         </span>
       )
@@ -37,23 +38,27 @@ export class Domino extends React.Component {
   dominoDotClassNames = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
 
   render() {
-    const {value, flipTile, handIndex, tileIndex} = this.props;
+    const {value, flipTile, handIndex, tileIndex, className, selectedIndex} = this.props;
     if (!value) return null;
 
     const left = value[0];
     const right = value[1];
     return (
       <span>
-      <div {...{className: "domino", id: tileIndex}}>
-        <div className={classnames("left", this.dominoDotClassNames[left])}>
-          {this.generateDots(left)}
+        <div {...{className: classnames("domino selectable", className), id: tileIndex}}>
+          <div {...{id: tileIndex, className: classnames("left", this.dominoDotClassNames[left])}}>
+            {this.generateDots(left)}
+          </div>
+          <div {...{id: tileIndex, className: classnames("right", this.dominoDotClassNames[right])}}>
+            {this.generateDots(right)}
+          </div>
         </div>
-        <div className={classnames("right", this.dominoDotClassNames[right])}>
-          {this.generateDots(right)}
-        </div>
-      </div>
-        {flipTile && <div className="rotate-icon">
-        <RotateLeftIcon onClick={() => flipTile({handIndex, tileIndex, newValue: [right, left]})} />
+        {flipTile && <div className="tile-controls">
+          {selectedIndex
+            ? <span className="selected-indicator">{selectedIndex}</span> : <span/>}
+          <span className="rotate-icon">
+            <RotateLeftIcon onClick={() => flipTile({handIndex, tileIndex, newValue: [right, left]})}/>
+          </span>
         </div>}
       </span>
     );

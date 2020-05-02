@@ -1,17 +1,37 @@
 .trains {
-  height: 25vw;
+  width: 50%;
+  max-height: 90vh;
   overflow-y: scroll;
   text-align: left;
   margin: 0 20px;
-  -ms-overflow-style: none;
 }
 
-.trains::-webkit-scrollbar {
+.trains::-webkit-scrollbar, .train-contents::-webkit-scrollbar {
   display: none;
 }
 
 .train-row {
-  height: 100px;
+  position: relative;
+  min-height: 130px;
   border-bottom: 1px solid white;
-  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.train-name {
+  position: absolute;
+}
+
+.public-train {
+  color: gold;
+}
+
+.train-contents {
+  display: flex;
+  overflow-x: scroll;
+  margin-top: 25px;
+}
+
+.train-domino {
+  text-align: center;
+  margin: 10px 10px;
 }

@@ -27,8 +27,9 @@ export class Board extends React.Component {
       dominosRemaining: [],
       playerCount: null,
       players: [],
-      playersHands: [],
       round: 12,
+      playersHands: [],
+      publicTrains: [],
       trains: [],
       view: 0
     }
@@ -38,14 +39,13 @@ export class Board extends React.Component {
     if (count > 1 && count < 9) {
       this.setState({
         playerCount: count,
-        players,
-        trains: Array.from({length: parseInt(count)+1}).fill([])
+        players
       });
-      this.generateStartingHands({count});
+      this.generateStartingHands({count, round: 12});
     }
   };
 
-  generateStartingHands = ({count}) => {
+  generateStartingHands = ({count, round}) => {
     let tilesPerHand;
     if (count < 4) {
       tilesPerHand = 8;
@@ -56,7 +56,7 @@ export class Board extends React.Component {
     }
 
     let {dominos: dominosRemaining} = this.state;
-    dominosRemaining.splice(12, 1);
+    dominosRemaining.splice(round, 1);
 
     let playersHands = Array.from({length: count}).fill([]);
     for (let i = 0; i < tilesPerHand; i++) {
@@ -66,7 +66,7 @@ export class Board extends React.Component {
         dominosRemaining.splice(selectedIndex, 1);
       }
     }
-    this.setState({playersHands, dominosRemaining})
+    this.setState({playersHands, dominosRemaining, trains: Array.from({length: parseInt(count)+1}).fill([[0, round]])})
   };
 
   selectTile() {
@@ -90,12 +90,30 @@ export class Board extends React.Component {
     let {playersHands: newPlayersHands} = this.state;
     const selectedDomino = this.selectTile();
     newPlayersHands[handIndex] = newPlayersHands[handIndex].concat([selectedDomino]);
-
     this.setState({playersHands: newPlayersHands})
   };
 
+  addToTrain = ({newHand, handIndex, trainIndex, trainTiles}) => {
+    if (!trainIndex) return;
+    let {trains, playersHands} = this.state;
+    trains[trainIndex] = trains[trainIndex].concat(trainTiles);
+    playersHands[handIndex] = newHand;
+    this.setState({trains, playersHands, handIndex});
+  };
+
+  flipTrainState = (playerIndex) => {
+    const {publicTrains} = this.state;
+    if (publicTrains.includes(playerIndex)) {
+      publicTrains.splice(publicTrains.indexOf(playerIndex), 1);
+      this.setState({publicTrains})
+    } else {
+      const newPublicTrains = publicTrains.concat(playerIndex);
+      this.setState({publicTrains: newPublicTrains})
+    }
+  };
+
   render() {
-    const {playerCount, view, players, playersHands, round, trains} = this.state;
+    const {playerCount, view, players, playersHands, round, publicTrains, trains} = this.state;
     let content;
     if (playerCount === null) {
       content = (
@@ -105,32 +123,39 @@ export class Board extends React.Component {
       )
     } else {
       content = (
-        <span>
-          <div className="round">Round: {round}</div>
-          <Trains {...{trains, players}} />
+        <span className="content">
+          <Trains {...{trains, players, publicTrains, view}} />
           <hr/>
           <PlayerHand {...{
             view,
             hand: playersHands[view-1],
             flipTile: this.flipTile,
-            drawTile: this.drawTile
+            drawTile: this.drawTile,
+            addToTrain: this.addToTrain,
+            flipTrainState: this.flipTrainState,
+            publicTrains,
+            players,
+            trains
           }} />
         </span>
       )
     }
     return (
-      <div className="app">
-        {!!playerCount && <Toggle {...{
-          view,
-          playerCount,
-          players,
-          currentView: view,
-          setView: ({view}) => this.setState({view})
-        }} />}
+      <span>
+        {!!playerCount && <span>
+          <Toggle {...{
+            view,
+            playerCount,
+            players,
+            currentView: view,
+            setView: ({view}) => this.setState({view})
+          }} />
+          <div className="round">Round: {round}</div>
+        </span>}
         <div className="board">
           {content}
         </div>
-      </div>
+      </span>
     );
   }
 };
