@@ -30,9 +30,9 @@ export class SubmitForm extends React.Component {
           <select {...{id: "train-select", onChange: this.onChange, value}}>
             <option {...{value: ''}}>Select a Train</option>
             <option {...{value: handIndex}}>Your Train</option>
-            {publicTrains.map((index) => {
+            {publicTrains.map((val, index) => {
               const name = players[index];
-              if (index === handIndex) return null;
+              if (index === handIndex || !val) return null;
               return (<option {...{key: index, value: index}}>{name}</option>)
             })}
             <option {...{value: players.length}}>Mexican Train</option>

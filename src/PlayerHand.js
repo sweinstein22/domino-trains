@@ -101,7 +101,7 @@ export class PlayerHand extends React.Component {
     const {view, hand, flipTile, drawTile, players, publicTrains, flipTrainState} = this.props;
     const {selectedTiles} = this.state;
     const handIndex = view-1;
-    const trainIsPublic = publicTrains.some(index => index === handIndex);
+    const trainIsPublic = publicTrains[handIndex];
     if (view === 0) {
       return <div className="welcome">Welcome!</div>
     }
