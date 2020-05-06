@@ -1,4 +1,5 @@
 import React from 'react';
+import {connect} from "react-redux";
 
 export class SubmitForm extends React.Component {
   constructor(props) {
@@ -44,4 +45,8 @@ export class SubmitForm extends React.Component {
   }
 }
 
-export default SubmitForm;
+export const mapStateToProps = ({players, publicTrains, view}) => ({
+  players, publicTrains, handIndex: parseInt(view)-1
+});
+
+export default connect(mapStateToProps)(SubmitForm);

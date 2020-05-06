@@ -1,10 +1,11 @@
 import React from 'react';
 import classnames from 'classnames';
 import TrainIcon from '@material-ui/icons/Train';
+import {connect} from "react-redux";
 import './Trains.css';
 import Domino from "./Domino";
 
-export class Trains extends React.Component {
+class Trains extends React.Component {
   displayTrain = (train, index) => {
     const {players, publicTrains, view} = this.props;
     const playerIndex = view-1;
@@ -15,7 +16,7 @@ export class Trains extends React.Component {
         {index === players.length ? ` Mexican Train: ` : ` ${players[index]}:`}
       </span>
       <span className="train-contents">
-        {train.map((domino, key) =>
+        {Object.values(train).map((domino, key) =>
           <Domino {...{key: `${index}-${key}`, value: domino, className: classnames('train-domino')}}/>
         )}
       </span>
@@ -33,4 +34,8 @@ export class Trains extends React.Component {
   };
 }
 
-export default Trains;
+const mapStateToProps = ({players, publicTrains, trains}) => ({
+  players, publicTrains, trains
+});
+
+export default connect(mapStateToProps)(Trains);

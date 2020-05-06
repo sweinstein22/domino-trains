@@ -2,8 +2,11 @@ import React from 'react';
 import './PlayerHand.css';
 import Domino from "./Domino";
 import SubmitForm from "./SubmitForm";
+import {connect} from "react-redux";
+import store from "./ReduxStore";
+import ServerAPI from "./ServerAPI";
 
-export class PlayerHand extends React.Component {
+class PlayerHand extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -88,19 +91,55 @@ export class PlayerHand extends React.Component {
     }
   };
 
-  addToTrain = (trainIndex) => {
-    const {addToTrain, hand, view} = this.props;
-    const {selectedTiles} = this.state;
-    const newHand = hand.filter(domino => !selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1]));
-    this.setState({selectedTiles: []});
+  flipTrainState = () => {
+    const {publicTrains, view} = this.props;
+    const playerIndex = parseInt(view)-1;
+    publicTrains[playerIndex] = !publicTrains[playerIndex];
 
-    addToTrain({newHand, handIndex: view-1, trainIndex, trainTiles: selectedTiles});
+    store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
+    ServerAPI.pollServerState();
+  };
+
+  drawTile = () => {
+    let {dominosRemaining, playersHands: newPlayersHands, handIndex} = this.props;
+    const selectedIndex = Math.floor(Math.random() * Math.floor(dominosRemaining.length));
+    const selectedDomino = dominosRemaining[selectedIndex];
+    newPlayersHands[handIndex] = newPlayersHands[handIndex].concat([selectedDomino]);
+
+    dominosRemaining.splice(selectedIndex, 1);
+    store.dispatch({type: 'SET', path: ['dominosRemaining'], value: dominosRemaining});
+
+    store.dispatch({type: 'SET', path: ['playersHands'], value: newPlayersHands});
+    ServerAPI.pollServerState();
+  };
+
+  flipTile = ({handIndex, tileIndex, newValue}) => {
+    let {playersHands: newPlayersHands} = this.state;
+    newPlayersHands[handIndex][tileIndex] = newValue;
+
+    store.dispatch({type: 'SET', path: ['playersHands'], value: newPlayersHands});
+    ServerAPI.pollServerState();
+  };
+
+  addToTrain = (trainIndex) => {
+    if (!trainIndex) return;
+
+    const {selectedTiles} = this.state;
+    const {hand, handIndex, trains, playersHands} = this.props;
+    const newHand = hand.filter(domino => !selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1]));
+
+    trains[trainIndex] = trains[trainIndex].concat(selectedTiles);
+    playersHands[handIndex] = newHand;
+
+    this.setState({selectedTiles: []});
+    store.dispatch({type: 'SET', path: ['trains'], value: trains});
+    store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
+    ServerAPI.pollServerState();
   };
 
   render() {
-    const {view, hand, flipTile, drawTile, players, publicTrains, flipTrainState} = this.props;
+    const {view, hand, handIndex, publicTrains} = this.props;
     const {selectedTiles} = this.state;
-    const handIndex = view-1;
     const trainIsPublic = publicTrains[handIndex];
     if (view === 0) {
       return <div className="welcome">Welcome!</div>
@@ -112,7 +151,7 @@ export class PlayerHand extends React.Component {
       <span {...{draggable: true, className: "draggable", key: index}}>
         <Domino {...{
           value: domino,
-          flipTile,
+          flipTile: this.flipTile,
           handIndex,
           tileIndex: index,
           selectedIndex: tileIsSelected ? selectedTiles.findIndex(selected => selected[0] === domino[0] && selected[1] === domino[1])+1 : null,
@@ -126,10 +165,10 @@ export class PlayerHand extends React.Component {
         <div className="hand">
         <span className="player-actions">
           <span>
-            <button {...{onClick: () => drawTile({handIndex})}}>Draw Tile</button>
-            <button {...{onClick: () => flipTrainState(handIndex)}}>Make Train {trainIsPublic ? 'Public' : 'Private'}</button>
+            <button {...{onClick: () => this.drawTile()}}>Draw Tile</button>
+            <button {...{onClick: () => this.flipTrainState()}}>Make Train {trainIsPublic ? 'Public' : 'Private'}</button>
           </span>
-            <SubmitForm {...{addToTrain: this.addToTrain, players, publicTrains, handIndex}} />
+            <SubmitForm {...{addToTrain: this.addToTrain}} />
         </span>
           <span className="domino-section">
         {dominos}
@@ -140,4 +179,13 @@ export class PlayerHand extends React.Component {
   }
 }
 
-export default PlayerHand;
+const mapStateToProps = ({dominosRemaining, view, playersHands, publicTrains}) => ({
+  dominosRemaining,
+  hand: playersHands[parseInt(view)-1],
+  handIndex: parseInt(view)-1,
+  playersHands,
+  publicTrains,
+  view,
+});
+
+export default connect(mapStateToProps)(PlayerHand);

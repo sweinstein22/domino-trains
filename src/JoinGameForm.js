@@ -1,7 +1,8 @@
 import React from 'react';
 import './JoinGameForm.css';
+import store from './ReduxStore';
 
-export class JoinGameForm extends React.Component {
+class JoinGameForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -29,20 +30,28 @@ export class JoinGameForm extends React.Component {
     this.setState({players});
   };
 
+  submitForm = async () => {
+    const {count, players} = this.state;
+    if (count > 1 && count < 9) {
+      await store.dispatch({type: 'SET', path: ['playerCount'], value: parseInt(count)});
+      await store.dispatch({type: 'SET', path: ['players'], value: players});
+      store.generateStartingHands();
+    }
+  };
+
   render() {
-    const {setPlayers, playerCountSet} = this.props;
     const {count, players, countWarning} = this.state;
 
     return (
       <form className="game-form">
-        {!playerCountSet && <span>
+        <span>
           <label htmlFor="player-count">Number of Players (Max 8): </label>
           <input type="text" id="player-count" value={count} onChange={(event) => this.setCount(event)}/>
           <br/>
           {countWarning}
           {countWarning && <br/>}
           <br/>
-        </span>}
+        </span>
         {players.map((val, index) =>
           <span {...{key: index}}>
             <label htmlFor="player-name">Player {index + 1}: </label>
@@ -51,7 +60,7 @@ export class JoinGameForm extends React.Component {
           </span>
         )}
         <br/><br/>
-        <button type="button" onClick={() => setPlayers({count, players})}>Join Game</button>
+        <button type="button" onClick={() => this.submitForm()}>Join Game</button>
       </form>
     );
   };

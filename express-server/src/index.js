@@ -8,13 +8,13 @@ const storage = require('node-persist');
 const app = express();
 const server = require('http').Server(app);
 
-storage.init({expiredInterval: 2 * 60 * 1000,} );
+storage.init({expiredInterval: 0,} );
 
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
-app.use(cors({ origin: true }))
+app.use(cors({ origin: true }));
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -24,7 +24,7 @@ app.use(function(req, res, next) {
 });
 
 //pre-flight requests
-app.options('*', cors({ origin: true }), (req, res) => {
+app.options('*', (req, res) => {
   res.sendStatus(200);
 });
 
@@ -33,9 +33,7 @@ const simpleEndpoint = async (endpoint, req, res) => {
     let value = await storage.getItem(endpoint) || {};
     res.status(200).json(value);
   } else if (req.method === 'POST') {
-    const {body} = req;
-    console.log(body)
-    await storage.setItem(endpoint, body);
+    await storage.setItem(endpoint, req.body);
     res.status(200).json(body);
   } else if (req.method === 'PUT') {
     res.json({hello: 'world'})
@@ -46,15 +44,11 @@ const simpleEndpoint = async (endpoint, req, res) => {
 const mergeEndpoint = async (endpoint, index, method, req, res) => {
   if (method === 'GET') {
     let value = await storage.getItem(endpoint) || {};
-    console.log(value)
     res.status(200).json(value);
   } else if (method === 'POST') {
-    const {body} = req;
-    console.log(body)
     let value = await storage.getItem(endpoint) || {};
-    value[index] = body
+    value[index] = req;
     await storage.setItem(endpoint, value);
-    console.log(value)
     res.status(200).json(value);
   } else if (method === 'PUT') {
     res.json({hello: 'world'})
