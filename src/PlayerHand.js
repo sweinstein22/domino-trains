@@ -58,10 +58,13 @@ class PlayerHand extends React.Component {
 
   _onDrop = (e) => {
     e.preventDefault();
-    let {hand} = this.props;
+    let {hand, handIndex, playersHands} = this.props;
     const {startingDragIndex, stoppingDragIndex} = this.state;
     const tileToMove = hand.splice(startingDragIndex, 1);
     hand.splice(stoppingDragIndex, 0, ...tileToMove);
+    playersHands[handIndex] = hand;
+    store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
+    ServerAPI.stateToServer();
   };
 
   _onDragEnd = (e) => {
@@ -92,12 +95,11 @@ class PlayerHand extends React.Component {
   };
 
   flipTrainState = () => {
-    const {publicTrains, view} = this.props;
-    const playerIndex = parseInt(view)-1;
-    publicTrains[playerIndex] = !publicTrains[playerIndex];
+    const {publicTrains, handIndex} = this.props;
+    publicTrains[handIndex] = !publicTrains[handIndex];
 
     store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
-    ServerAPI.pollServerState();
+    ServerAPI.stateToServer();
   };
 
   drawTile = () => {
@@ -110,15 +112,27 @@ class PlayerHand extends React.Component {
     store.dispatch({type: 'SET', path: ['dominosRemaining'], value: dominosRemaining});
 
     store.dispatch({type: 'SET', path: ['playersHands'], value: newPlayersHands});
-    ServerAPI.pollServerState();
+    ServerAPI.stateToServer();
   };
 
   flipTile = ({handIndex, tileIndex, newValue}) => {
-    let {playersHands: newPlayersHands} = this.state;
+    let {playersHands: newPlayersHands} = this.props;
     newPlayersHands[handIndex][tileIndex] = newValue;
 
     store.dispatch({type: 'SET', path: ['playersHands'], value: newPlayersHands});
-    ServerAPI.pollServerState();
+    ServerAPI.stateToServer();
+  };
+
+  endTurn = () => {
+    let {players} = this.props;
+    let nextPlayerIndex = store.currentTurnPlayerIndex()+1;
+    if (nextPlayerIndex === players.length) {
+      nextPlayerIndex = 0;
+    }
+    const nextPlayer = players[nextPlayerIndex];
+
+    store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: nextPlayer});
+    ServerAPI.stateToServer();
   };
 
   addToTrain = (trainIndex) => {
@@ -134,15 +148,18 @@ class PlayerHand extends React.Component {
     this.setState({selectedTiles: []});
     store.dispatch({type: 'SET', path: ['trains'], value: trains});
     store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
-    ServerAPI.pollServerState();
+    ServerAPI.stateToServer();
   };
 
   render() {
-    const {view, hand, handIndex, publicTrains} = this.props;
+    const {hand, handIndex, publicTrains} = this.props;
     const {selectedTiles} = this.state;
     const trainIsPublic = publicTrains[handIndex];
-    if (view === 0) {
+    const isPlayersTurn = store.currentTurnPlayerIndex() === handIndex;
+    if (handIndex === -1) {
       return <div className="welcome">Welcome!</div>
+    } else if (!hand) {
+      return <div className="loading-page">Loading...</div>
     }
 
     const dominos = hand && hand.map((domino, index) => {
@@ -163,13 +180,14 @@ class PlayerHand extends React.Component {
     return (
       <div className="player-hand">
         <div className="hand">
-        <span className="player-actions">
+        {isPlayersTurn && <span className="player-actions">
           <span>
             <button {...{onClick: () => this.drawTile()}}>Draw Tile</button>
-            <button {...{onClick: () => this.flipTrainState()}}>Make Train {trainIsPublic ? 'Public' : 'Private'}</button>
+            <button {...{onClick: () => this.flipTrainState()}}>Make Train {trainIsPublic ? 'Private' : 'Public'}</button>
+            <button {...{onClick: () => this.endTurn()}}>End Turn</button>
           </span>
             <SubmitForm {...{addToTrain: this.addToTrain}} />
-        </span>
+        </span>}
           <span className="domino-section">
         {dominos}
         </span>
@@ -179,13 +197,17 @@ class PlayerHand extends React.Component {
   }
 }
 
-const mapStateToProps = ({dominosRemaining, view, playersHands, publicTrains}) => ({
-  dominosRemaining,
-  hand: playersHands[parseInt(view)-1],
-  handIndex: parseInt(view)-1,
-  playersHands,
-  publicTrains,
-  view,
-});
+const mapStateToProps = ({dominosRemaining, view, playersHands, publicTrains, players, trains}) => {
+  const index = parseInt(view)-1;
+  return {
+    dominosRemaining,
+    hand: index !== -1 ? playersHands[index] : [],
+    handIndex: index,
+    playersHands,
+    publicTrains,
+    players,
+    trains,
+  }
+};
 
 export default connect(mapStateToProps)(PlayerHand);

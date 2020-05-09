@@ -1,6 +1,7 @@
-.welcome {
+.welcome, .loading-page {
   width: 50%;
   max-height: 90vh;
+  font-style: italic;
 }
 
 .player-hand {

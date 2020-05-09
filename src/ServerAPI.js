@@ -15,120 +15,113 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const ServerAPI = {
-  mergeKeys: ['playersHands', 'publicTrains'],
-  complexKeys: ['playersHands', 'publicTrains', 'trains'],
-  keys: ['dominosRemaining', 'playerCount', 'players', 'playersHands', 'publicTrains', 'round', 'trains'],
+  complexKeyEncodings: ['playerState'],
+  simpleKeyEncodings: ['currentTurnPlayer', 'dominosRemaining', 'playerCount', 'players', 'round', 'trains'],
 
-  initServerState: () => {
-    const state = store.getState();
-    Object.keys(state).forEach(key => {
-      if (!['view', 'dominos'].includes(key)) {
-        if (ServerAPI.complexKeys.includes(key)) {
-          let value = {};
-          state[key].forEach((val, index) => {
-            value[index.toString()] = JSON.stringify(val);
-          });
-          //fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
-          fetch(`http://localhost:8080/${key}`, {
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify(value),
-            headers: {'Content-Type': 'application/json'}
-          })
-            .then(response => response.json())
-            .then(val => console.log(val));
-        } else {
-          const value = {value: state[key]};
-          //fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
-          fetch(`http://localhost:8080/${key}`, {
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify(value),
-            headers: {'Content-Type': 'application/json'}
-          })
-            .then(response => response.json())
-            .then(val => console.log(val));
-        }
-      }
-    });
+  postToServer: async ({key, value, includeIndex}) => {
+    let returnVal = null;
+    const method = includeIndex ? 'PUT' : 'POST';
+    await fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
+      method,
+      mode: 'cors',
+      body: value,
+      headers: {'Content-Type': 'application/json'}
+    })
+      .catch(e => console.log('Error setting ', key, ':', e));
+    return returnVal;
   },
 
-  stateToServer: () => {
-    const state = store.getState();
-    const {view} = state;
+  getFromServer: async ({key}) => {
+    let returnVal = null;
+    await fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {'Content-Type': 'application/json'}
+    })
+      .then(response => response.json())
+      .then(value => returnVal = value)
+      .catch(e => console.log('Error getting ', key, ':', e));
+    return returnVal;
+  },
 
+  initServerState: async () => {
+    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
+    ServerAPI.postToServer({key: 'playerState', value: await ServerAPI.stringifyPlayerState({sendAll: true})});
+  },
+
+  resetServerState: async () => {
+    ServerAPI.postToServer({key: 'reset', value: JSON.stringify({})});
+    ServerAPI.initServerState();
+  },
+
+  stateToServer: async () => {
+    const {view, playerCount} = store.getState();
+    if (playerCount === null) return;
+    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
     if (view && view !== 0) {
-      Object.keys(state).forEach(key => {
-        if (!['view', 'dominos'].includes(key)) {
-          const index = (view - 1).toString();
-
-          const stateAtKey = state[key];
-
-          if (ServerAPI.mergeKeys.includes(key)) {
-            const value = stateAtKey.length ? JSON.stringify(stateAtKey[view - 1]) : JSON.stringify([]);
-            //fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
-            fetch(`http://localhost:8080/${key}`, {
-              method: 'POST',
-              mode: 'cors',
-              body: JSON.stringify({index: index.toString(), value}),
-              headers: {'Content-Type': 'application/json'}
-            })
-              .then(response => response.json())
-              .then(val => console.log(val));
-          }
-          else {
-            let value;
-            switch (typeof stateAtKey) {
-              case 'array':
-                value = stateAtKey.length ? stateAtKey : [];
-                break;
-              default:
-                value = stateAtKey;
-                break;
-            }
-            //fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
-            fetch(`http://localhost:8080/${key}`, {
-              method: 'POST',
-              mode: 'cors',
-              body: JSON.stringify(value),
-              headers: {'Content-Type': 'application/json'}
-            }).then(val => console.log(val.json()));
-          }
-        }
-      });
+      ServerAPI.postToServer({key: 'playerState', value: await ServerAPI.stringifyPlayerState({sendAll: false})});
     }
   },
 
-  pollServerState: () => {
-    let state = store.getState();
+  pollServerState: async () => {
+    const {playerCount} = store.getState();
+    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.parseSimpleEndpoints({key, value: await ServerAPI.getFromServer({key})}));
+    if (playerCount) {
+      ServerAPI.parsePlayerState({value: await ServerAPI.getFromServer({key: 'playerState'})});
+    }
+  },
 
-    return ServerAPI.keys.forEach(key => {
-      // fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
-      fetch(`http://localhost:8080/${key}`, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {'Content-Type': 'application/json'}
-      })
-        .then(response => response.json())
-        .then(value => {
-          if (!ServerAPI.complexKeys.includes(key)) {
-            const dataFromServer = value.value ? value.value : value;
-            store.dispatch({
-              type: 'SET', path: [key], value: dataFromServer
-            });
-          } else {
-            if (key === 'publicTrains') {
-              const publicTrains = Object.keys(value).filter(ind => value[ind]);
-              store.dispatch({type: 'SET', path: [key], value: publicTrains});
-            } else {
-              Object.values(value).forEach((val, index) => {
-                state[key][index] = value
-              });
-              store.dispatch({type: 'SET', path: [key], value: state[key]});
-            }
-          }
-        });
+  parsePlayerState: ({value}) => {
+    let {playersHands, publicTrains} = store.getState();
+    Object.keys(value).forEach(index => {
+      playersHands[index] = JSON.parse(value[index].hand);
+      publicTrains[index] = value[index].isPublic;
     });
+    store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
+    store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
+  },
+
+  stringifyPlayerState: ({sendAll}) => {
+    const {playersHands, publicTrains, view} = store.getState();
+    if (!playersHands.length) return;
+
+    let value = {};
+    if (sendAll) {
+      playersHands.forEach((hand, index) => {
+        value[index] = {index, hand: JSON.stringify(hand), isPublic: publicTrains[index]};
+      });
+      return JSON.stringify({value});
+    } else {
+      if (view && view !== 0) {
+        const index = parseInt(view)-1;
+        value[index] = {index, hand: JSON.stringify(playersHands[index]), isPublic: publicTrains[index]};
+        return JSON.stringify({value});
+      }
+    }
+  },
+
+  parseSimpleEndpoints: ({key, value}) => {
+    let dataFromServer = typeof value === 'object' && Object.keys(value).includes('value') ? value.value : value;
+    store.dispatch({
+      type: 'SET', path: [key], value: dataFromServer
+    });
+  },
+
+  stringifySimpleEndpoints: ({key}) => {
+    const stateAtKey = store.getState()[key];
+    let value;
+    if (!stateAtKey) {
+      value = key === 'playerCount' ? {value: stateAtKey} : [];
+    }
+    switch (typeof stateAtKey) {
+      case 'array':
+        value = stateAtKey.length ? stateAtKey : [];
+        break;
+      default:
+        value = {value: stateAtKey};
+        break;
+    }
+    return JSON.stringify(value);
   },
 };
 

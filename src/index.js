@@ -5,6 +5,9 @@ import {Provider} from 'react-redux';
 import store from './ReduxStore';
 import Board from './Board';
 import * as serviceWorker from './serviceWorker';
+import ServerAPI from "./ServerAPI";
+
+store.subscribe(() => ServerAPI.stateToServer());
 
 ReactDOM.render(
   <React.StrictMode>

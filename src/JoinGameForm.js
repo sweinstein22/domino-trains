@@ -35,6 +35,7 @@ class JoinGameForm extends React.Component {
     if (count > 1 && count < 9) {
       await store.dispatch({type: 'SET', path: ['playerCount'], value: parseInt(count)});
       await store.dispatch({type: 'SET', path: ['players'], value: players});
+      await store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: players[0]});
       store.generateStartingHands();
     }
   };

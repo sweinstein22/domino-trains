@@ -17,8 +17,8 @@ class Toggle extends React.Component {
       <div className="toggle">
         <span>
           <button {...{onClick: async () => {
-            ServerAPI.stateToServer();
             store.resetStore();
+            ServerAPI.resetServerState();
           }}}>Reset Game</button>
         </span>
         <span>

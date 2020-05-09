@@ -7,9 +7,8 @@ import Domino from "./Domino";
 
 class Trains extends React.Component {
   displayTrain = (train, index) => {
-    const {players, publicTrains, view} = this.props;
-    const playerIndex = view-1;
-    const isPublic = playerIndex === index || publicTrains.includes(index) || index === players.length;
+    const {players, publicTrains, playerIndex} = this.props;
+    const isPublic = playerIndex === index || publicTrains[index] || index === players.length;
     return (<div {...{key: index, className: 'train-row'}}>
       <span {...{className: classnames("train-name", {'public-train': isPublic})}}>
         <TrainIcon/>
@@ -34,8 +33,8 @@ class Trains extends React.Component {
   };
 }
 
-const mapStateToProps = ({players, publicTrains, trains}) => ({
-  players, publicTrains, trains
+const mapStateToProps = ({players, publicTrains, trains, view}) => ({
+  players, publicTrains, trains, playerIndex: parseInt(view)-1
 });
 
 export default connect(mapStateToProps)(Trains);

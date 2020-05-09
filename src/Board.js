@@ -10,14 +10,10 @@ import ServerAPI from "./ServerAPI";
 class Board extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      playerCount: null
-    };
     ServerAPI.pollServerState();
   }
 
   componentDidMount() {
-    ServerAPI.pollServerState();
     this.interval = setInterval(() => ServerAPI.pollServerState(), 5000);
   };
 
@@ -26,7 +22,7 @@ class Board extends React.Component {
   }
 
   render() {
-    const {playerCount, players, round} = this.props;
+    const {currentTurnPlayer, playerCount, players, round} = this.props;
     let content;
     if (playerCount === null || playerCount === undefined) {
       content = (
@@ -47,7 +43,7 @@ class Board extends React.Component {
       <span>
         {!!playerCount && <span>
           <Toggle />
-          <div className="round">Round: {round}</div>
+          <div className="round">Round: {round}, {currentTurnPlayer}'s Turn</div>
         </span>}
         <div className="board">
           {content}
@@ -57,9 +53,8 @@ class Board extends React.Component {
   }
 }
 
-const mapStateToProps = ({dominosRemaining, playerCount, players, publicTrains, round, trains}) => (
-  {dominosRemaining, playerCount, players, publicTrains, round, trains}
+const mapStateToProps = ({currentTurnPlayer, dominosRemaining, playerCount, players, publicTrains, round, trains}) => (
+  {currentTurnPlayer, dominosRemaining, playerCount, players, publicTrains, round, trains}
 );
 
 export default connect(mapStateToProps)(Board);
-// export default Board;

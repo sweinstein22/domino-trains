@@ -29,45 +29,50 @@ app.options('*', (req, res) => {
 });
 
 const simpleEndpoint = async (endpoint, req, res) => {
-  if (req.method === 'GET') {
-    let value = await storage.getItem(endpoint) || {};
-    res.status(200).json(value);
-  } else if (req.method === 'POST') {
-    await storage.setItem(endpoint, req.body);
-    res.status(200).json(body);
-  } else if (req.method === 'PUT') {
-    res.json({hello: 'world'})
+  try {
+    if (req.method === 'GET') {
+      let value = await storage.getItem(endpoint) || [];
+      res.status(200).json(value);
+    } else if (req.method === 'POST') {
+      await storage.setItem(endpoint, req.body);
+      res.status(200).json(req.body);
+    } else if (req.method === 'PUT') {
+      res.json({hello: 'world'});
+    }
+  } catch (e) {
+    console.log(endpoint, ': ', e)
   }
-
 };
 
-const mergeEndpoint = async (endpoint, index, method, req, res) => {
-  if (method === 'GET') {
-    let value = await storage.getItem(endpoint) || {};
-    res.status(200).json(value);
-  } else if (method === 'POST') {
-    let value = await storage.getItem(endpoint) || {};
-    value[index] = req;
-    await storage.setItem(endpoint, value);
-    res.status(200).json(value);
-  } else if (method === 'PUT') {
-    res.json({hello: 'world'})
+const mergeEndpoint = async (endpoint, req, res) => {
+  try {
+    if (req.method === 'GET') {
+      const players = await storage.getItem('players');
+      let value = {};
+      await Promise.all(
+        players.value.map((_, index) => storage.getItem(`${endpoint}${index}`) || [])
+      ).then(
+        (fetchedValues) => fetchedValues.map((val, index) => value[index] = val)
+      );
+      res.status(200).json(value);
+    } else if (req.method === 'POST') {
+      if (!(req.body && req.body.value)) return;
+      Object.keys(req.body.value).map(async index => await storage.setItem(`${endpoint}${index}`, req.body.value[index]));
+      res.json(req.body)
+    } else if (res.method === 'PUT') {
+      res.json({hello: 'world'});
+    }
+  } catch (e) {
+    console.log(endpoint, ': ', e)
   }
-
 };
 
-app.all('/playersHands', async (req, res) => {
-  let {body, method} = req;
-  mergeEndpoint('playerHands', body.index, method, body.value, res);
+app.all('/playerState', async (req, res) => {
+  mergeEndpoint('playerState', req, res);
 });
 
-app.all('/publicTrains', async (req, res) => {
-  let {body, method} = req;
-  mergeEndpoint('publicTrains', body.index, method, body.value, res);
-});
-
-app.all('/trains', async (req, res) => {
-  simpleEndpoint('trains', req, res);
+app.all('/currentTurnPlayer', async (req, res) => {
+  simpleEndpoint('currentTurnPlayer', req, res);
 });
 
 app.all('/dominosRemaining', async (req, res) => {
@@ -82,8 +87,22 @@ app.all('/players', async (req, res) => {
   simpleEndpoint('players', req, res);
 });
 
+app.all('/reset', async (req, res) => {
+  try {
+    storage.setItem('playerCount', {value: null});
+    storage.setItem('round', {value: 12});
+    res.sendStatus(200);
+  } catch (e) {
+    console.log('clear failed: ', e);
+  }
+});
+
 app.all('/round', async (req, res) => {
   simpleEndpoint('round', req, res);
+});
+
+app.all('/trains', async (req, res) => {
+  simpleEndpoint('trains', req, res);
 });
 
 
