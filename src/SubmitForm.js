@@ -1,5 +1,7 @@
 import React from 'react';
+import './SubmitForm.css';
 import {connect} from "react-redux";
+import { Button, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
 
 export class SubmitForm extends React.Component {
   constructor(props) {
@@ -26,20 +28,22 @@ export class SubmitForm extends React.Component {
     const {value} = this.state;
     return (
       <div className="submit-form">
-        <form>
-          <label htmlFor="train-select">Train to add to: </label>
-          <select {...{id: "train-select", onChange: this.onChange, value}}>
-            <option {...{value: ''}}>Select a Train</option>
-            <option {...{value: handIndex}}>Your Train</option>
+        <FormControl>
+          <InputLabel htmlFor="train-select">Train to add to: </InputLabel>
+          <Select {...{id: "train-select", onChange: this.onChange, value}}>
+            <MenuItem {...{value: ''}}>Select a Train</MenuItem>
+            <MenuItem {...{value: handIndex}}>Your Train</MenuItem>
             {publicTrains.map((val, index) => {
               const name = players[index];
               if (index === handIndex || !val || index === players.length) return null;
-              return (<option {...{key: index, value: index}}>{name}</option>)
+              return (<MenuItem {...{key: index, value: index}}>{name}</MenuItem>)
             })}
-            <option {...{value: players.length}}>Mexican Train</option>
-          </select>
-          <button {...{onClick: this.submit, disabled: value === ''}}>Submit</button>
-        </form>
+            <MenuItem {...{value: players.length}}>Mexican Train</MenuItem>
+          </Select>
+          <Button {...{variant: 'outlined', size: 'small', onClick: this.submit, disabled: value === ''}}>
+            Submit
+          </Button>
+        </FormControl>
       </div>
     );
   }

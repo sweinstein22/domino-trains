@@ -16,8 +16,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use(cors({ origin: true }));
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
   res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
   res.header("Access-Control-Allow-Headers", "*");
   next();
@@ -79,6 +79,10 @@ app.all('/dominosRemaining', async (req, res) => {
   simpleEndpoint('dominosRemaining', req, res);
 });
 
+app.all('/gameStateMessage', async (req, res) => {
+  simpleEndpoint('gameStateMessage', req, res);
+});
+
 app.all('/playerCount', async (req, res) => {
   simpleEndpoint('playerCount', req, res);
 });
@@ -99,6 +103,10 @@ app.all('/reset', async (req, res) => {
 
 app.all('/round', async (req, res) => {
   simpleEndpoint('round', req, res);
+});
+
+app.all('/scores', async (req, res) => {
+  simpleEndpoint('scores', req, res);
 });
 
 app.all('/trains', async (req, res) => {

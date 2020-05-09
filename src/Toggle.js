@@ -1,5 +1,6 @@
 import React from 'react';
 import classnames from 'classnames';
+import { Button } from '@material-ui/core';
 import './Toggle.css';
 import ServerAPI from "./ServerAPI";
 import {connect} from "react-redux";
@@ -10,28 +11,41 @@ class Toggle extends React.Component {
     store.dispatch({type: 'SET', path: ['view'], value: view})
   };
 
+  showScores = () => {
+    store.dispatch({type: 'SET', path: ['showScores'], value: true})
+  };
+
   render() {
     const {playerCount, players, view} = this.props;
     if (!players) return null;
     return (
       <div className="toggle">
         <span>
-          <button {...{onClick: async () => {
+          <Button {...{
+            variant: 'outlined', size: 'small',
+            onClick: async () => {
             store.resetStore();
             ServerAPI.resetServerState();
-          }}}>Reset Game</button>
+          }}}>Reset Game</Button>
         </span>
         <span>
-          <button {...{
+          <Button {...{
+            variant: 'outlined', size: 'small',
             onClick: () => this.setView({view: 0}),
             className: classnames(view === 0 ? 'active' : '')
-          }}>Welcome!</button>
+          }}>Welcome!</Button>
           {Array.from({length: playerCount}).map((_, index) =>
-            <button key={index} onClick={() => this.setView({view: index + 1})}
-                    className={classnames(view === index + 1 ? 'active' : '')}>
+            <Button {...{
+              variant: 'outlined', key: index, size: 'small',
+              onClick: () => this.setView({view: index + 1}),
+              className: classnames(view === index + 1 ? 'active' : '')
+            }}>
               Player {index + 1}: {players[index]}
-            </button>
+            </Button>
           )}
+          <Button {...{variant: 'outlined', size: 'small', onClick: () => this.showScores()}}>
+            View Scores
+          </Button>
         </span>
       </div>
     );

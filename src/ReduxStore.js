@@ -33,11 +33,15 @@ const initialState = {
   ],
   currentTurnPlayer: '',
   dominosRemaining: [],
+  fetchInProgress: false,
+  gameStateMessage: '',
   playerCount: null,
   playersHands: [],
   publicTrains: [],
   players: [],
   round: 12,
+  scores: [],
+  showScores: false,
   trains: [],
   view: 0,
 };
@@ -87,7 +91,7 @@ export class ReduxStore {
     publicTrains[playerCount] = true;
     this.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
 
-      const trains = Array.from({length: parseInt(playerCount)+1}).fill([[0, round]]);
+    const trains = Array.from({length: parseInt(playerCount)+1}).fill([[0, round]]);
     this.dispatch({type: 'SET', path: ['trains'], value: trains});
 
     let playersHands = Array.from({length: playerCount}).fill([]);

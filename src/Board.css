@@ -22,8 +22,18 @@ body {
   justify-content: center;
 }
 
+button {
+  margin: 5px !important;
+}
+
 button.active {
   background-color: #00b8a0;
+  color: black;
+}
+
+button:hover {
+  background-color: #00b8a0;
+  color: white;
 }
 
 svg {

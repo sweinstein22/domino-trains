@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 
 const ServerAPI = {
   complexKeyEncodings: ['playerState'],
-  simpleKeyEncodings: ['currentTurnPlayer', 'dominosRemaining', 'playerCount', 'players', 'round', 'trains'],
+  simpleKeyEncodings: ['currentTurnPlayer', 'dominosRemaining', 'gameStateMessage', 'playerCount', 'players', 'round', 'scores', 'trains'],
 
   postToServer: async ({key, value, includeIndex}) => {
     let returnVal = null;
@@ -33,13 +33,17 @@ const ServerAPI = {
 
   getFromServer: async ({key}) => {
     let returnVal = null;
+    store.dispatch({type: 'SET', path: ['fetchInProgress'], value: true});
     await fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
       method: 'GET',
       mode: 'cors',
       headers: {'Content-Type': 'application/json'}
     })
       .then(response => response.json())
-      .then(value => returnVal = value)
+      .then(value => {
+        returnVal = value;
+        store.dispatch({type: 'SET', path: ['fetchInProgress'], value: false});
+      })
       .catch(e => console.log('Error getting ', key, ':', e));
     return returnVal;
   },
@@ -57,14 +61,18 @@ const ServerAPI = {
   stateToServer: async () => {
     const {view, playerCount} = store.getState();
     if (playerCount === null) return;
-    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
+    if (store.currentTurnPlayerIndex() === parseInt(view)-1) {
+      ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
+    }
     if (view && view !== 0) {
       ServerAPI.postToServer({key: 'playerState', value: await ServerAPI.stringifyPlayerState({sendAll: false})});
     }
   },
 
   pollServerState: async () => {
-    const {playerCount} = store.getState();
+    const {playerCount, fetchInProgress} = store.getState();
+    if (fetchInProgress) return;
+
     ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.parseSimpleEndpoints({key, value: await ServerAPI.getFromServer({key})}));
     if (playerCount) {
       ServerAPI.parsePlayerState({value: await ServerAPI.getFromServer({key: 'playerState'})});

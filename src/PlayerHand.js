@@ -1,10 +1,13 @@
 import React from 'react';
 import './PlayerHand.css';
+import {connect} from "react-redux";
+import { Button } from '@material-ui/core';
 import Domino from "./Domino";
 import SubmitForm from "./SubmitForm";
-import {connect} from "react-redux";
 import store from "./ReduxStore";
 import ServerAPI from "./ServerAPI";
+import PlayerHandActions from "./PlayerHandActions";
+import ServerActions from "./ServerActions";
 
 class PlayerHand extends React.Component {
   constructor(props) {
@@ -17,7 +20,7 @@ class PlayerHand extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.view !== this.props.view) {
+    if (prevProps.view !== this.props.view || prevProps.round !== this.props.round) {
       this.setState({selectedTiles: []});
     }
   }
@@ -94,52 +97,11 @@ class PlayerHand extends React.Component {
     }
   };
 
-  flipTrainState = () => {
-    const {publicTrains, handIndex} = this.props;
-    publicTrains[handIndex] = !publicTrains[handIndex];
-
-    store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
-    ServerAPI.stateToServer();
-  };
-
-  drawTile = () => {
-    let {dominosRemaining, playersHands: newPlayersHands, handIndex} = this.props;
-    const selectedIndex = Math.floor(Math.random() * Math.floor(dominosRemaining.length));
-    const selectedDomino = dominosRemaining[selectedIndex];
-    newPlayersHands[handIndex] = newPlayersHands[handIndex].concat([selectedDomino]);
-
-    dominosRemaining.splice(selectedIndex, 1);
-    store.dispatch({type: 'SET', path: ['dominosRemaining'], value: dominosRemaining});
-
-    store.dispatch({type: 'SET', path: ['playersHands'], value: newPlayersHands});
-    ServerAPI.stateToServer();
-  };
-
-  flipTile = ({handIndex, tileIndex, newValue}) => {
-    let {playersHands: newPlayersHands} = this.props;
-    newPlayersHands[handIndex][tileIndex] = newValue;
-
-    store.dispatch({type: 'SET', path: ['playersHands'], value: newPlayersHands});
-    ServerAPI.stateToServer();
-  };
-
-  endTurn = () => {
-    let {players} = this.props;
-    let nextPlayerIndex = store.currentTurnPlayerIndex()+1;
-    if (nextPlayerIndex === players.length) {
-      nextPlayerIndex = 0;
-    }
-    const nextPlayer = players[nextPlayerIndex];
-
-    store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: nextPlayer});
-    ServerAPI.stateToServer();
-  };
-
   addToTrain = (trainIndex) => {
-    if (!trainIndex) return;
+    if (!trainIndex && trainIndex !== 0) return;
 
     const {selectedTiles} = this.state;
-    const {hand, handIndex, trains, playersHands} = this.props;
+    const {hand, handIndex, trains, players, playersHands, round} = this.props;
     const newHand = hand.filter(domino => !selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1]));
 
     trains[trainIndex] = trains[trainIndex].concat(selectedTiles);
@@ -148,7 +110,14 @@ class PlayerHand extends React.Component {
     this.setState({selectedTiles: []});
     store.dispatch({type: 'SET', path: ['trains'], value: trains});
     store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
-    ServerAPI.stateToServer();
+
+    if (!newHand.length) {
+      store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `${players[handIndex]} won round ${round}!`});
+      PlayerHandActions.calculateScores();
+    } else {
+      store.dispatch({type: 'SET', path: ['gameStateMessage'], value: ''});
+      ServerAPI.stateToServer();
+    }
   };
 
   render() {
@@ -165,26 +134,26 @@ class PlayerHand extends React.Component {
     const dominos = hand && hand.map((domino, index) => {
       const tileIsSelected = selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1]);
       return (
-      <span {...{draggable: true, className: "draggable", key: index}}>
+        <span {...{draggable: true, className: "draggable", key: index}}>
         <Domino {...{
           value: domino,
-          flipTile: this.flipTile,
-          handIndex,
+          flipTile: PlayerHandActions.flipTile,
           tileIndex: index,
-          selectedIndex: tileIsSelected ? selectedTiles.findIndex(selected => selected[0] === domino[0] && selected[1] === domino[1])+1 : null,
+          selectedIndex: tileIsSelected ? selectedTiles.findIndex(selected => selected[0] === domino[0] && selected[1] === domino[1]) + 1 : null,
           className: tileIsSelected ? 'selected-domino' : ''
         }} />
       </span>
-    )});
+      )
+    });
 
     return (
       <div className="player-hand">
         <div className="hand">
-        {isPlayersTurn && <span className="player-actions">
+          {isPlayersTurn && <span className="player-actions">
           <span>
-            <button {...{onClick: () => this.drawTile()}}>Draw Tile</button>
-            <button {...{onClick: () => this.flipTrainState()}}>Make Train {trainIsPublic ? 'Private' : 'Public'}</button>
-            <button {...{onClick: () => this.endTurn()}}>End Turn</button>
+            <Button {...{variant: 'outlined', size: 'small', onClick: () => PlayerHandActions.drawTile()}}>Draw Tile</Button>
+            <Button {...{variant: 'outlined', size: 'small', onClick: () => PlayerHandActions.flipTrainState()}}>Make Train {trainIsPublic ? 'Private' : 'Public'}</Button>
+            <Button {...{variant: 'outlined', size: 'small', onClick: () => ServerActions.endTurn()}}>End Turn</Button>
           </span>
             <SubmitForm {...{addToTrain: this.addToTrain}} />
         </span>}
@@ -197,8 +166,8 @@ class PlayerHand extends React.Component {
   }
 }
 
-const mapStateToProps = ({dominosRemaining, view, playersHands, publicTrains, players, trains}) => {
-  const index = parseInt(view)-1;
+const mapStateToProps = ({dominosRemaining, view, playersHands, publicTrains, players, round, trains}) => {
+  const index = parseInt(view) - 1;
   return {
     dominosRemaining,
     hand: index !== -1 ? playersHands[index] : [],
@@ -206,6 +175,7 @@ const mapStateToProps = ({dominosRemaining, view, playersHands, publicTrains, pl
     playersHands,
     publicTrains,
     players,
+    round,
     trains,
   }
 };

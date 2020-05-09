@@ -1,4 +1,4 @@
-## Deploy
+## Deploy client app
 
 Deployed using firebase
 
@@ -7,6 +7,16 @@ if not already installed, run `npm install -g firebase-tools` to install the fir
 login with `firebase login`
 run `firebase serve` to serve up the app locally
 run `firebase deploy` to deploy the application
+
+## Deploy server app
+
+Deployed using Heroku
+
+login using `heroku login`
+
+if remote tracking is not already set up, run `heroku git:remote -a domino-trains-server`
+
+to push app, run `git subtree push --prefix express-server heroku master`
 
 ## Available Scripts
 

@@ -38,7 +38,7 @@ export class Domino extends React.Component {
   dominoDotClassNames = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
 
   render() {
-    const {value, flipTile, handIndex, tileIndex, className, selectedIndex} = this.props;
+    const {value, flipTile, tileIndex, className, selectedIndex} = this.props;
     if (!value) return null;
 
     const left = value[0];
@@ -57,7 +57,7 @@ export class Domino extends React.Component {
           {selectedIndex
             ? <span className="selected-indicator">{selectedIndex}</span> : <span/>}
           <span className="rotate-icon">
-            <RotateLeftIcon onClick={() => flipTile({handIndex, tileIndex, newValue: [right, left]})}/>
+            <RotateLeftIcon onClick={() => flipTile({tileIndex, newValue: [right, left]})}/>
           </span>
         </div>}
       </span>

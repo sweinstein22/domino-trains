@@ -1,5 +1,6 @@
 import React from 'react';
 import './JoinGameForm.css';
+import { Button, TextField } from '@material-ui/core';
 import store from './ReduxStore';
 
 class JoinGameForm extends React.Component {
@@ -33,9 +34,10 @@ class JoinGameForm extends React.Component {
   submitForm = async () => {
     const {count, players} = this.state;
     if (count > 1 && count < 9) {
-      await store.dispatch({type: 'SET', path: ['playerCount'], value: parseInt(count)});
-      await store.dispatch({type: 'SET', path: ['players'], value: players});
-      await store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: players[0]});
+      store.dispatch({type: 'SET', path: ['playerCount'], value: parseInt(count)});
+      store.dispatch({type: 'SET', path: ['players'], value: players});
+      store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: players[0]});
+      store.dispatch({type: 'SET', path: ['scores'], value: Array.from({length: parseInt(count)}).fill([0])});
       store.generateStartingHands();
     }
   };
@@ -46,8 +48,8 @@ class JoinGameForm extends React.Component {
     return (
       <form className="game-form">
         <span>
-          <label htmlFor="player-count">Number of Players (Max 8): </label>
-          <input type="text" id="player-count" value={count} onChange={(event) => this.setCount(event)}/>
+          <TextField {...{label: 'Number of Players (Max 8): ', id: 'player-count', value: count,
+            onChange: (event) => this.setCount(event)}}/>
           <br/>
           {countWarning}
           {countWarning && <br/>}
@@ -55,13 +57,13 @@ class JoinGameForm extends React.Component {
         </span>
         {players.map((val, index) =>
           <span {...{key: index}}>
-            <label htmlFor="player-name">Player {index + 1}: </label>
-            <input type="text" id="player-name" value={players[index]} onChange={(event) => this.setPlayerNames(event, index)}/>
+            <TextField {...{label: `Player ${index + 1}: `, id: 'player-name', value: players[index],
+              onChange: (event) => this.setPlayerNames(event, index)}}/>
             <br/>
           </span>
         )}
         <br/><br/>
-        <button type="button" onClick={() => this.submitForm()}>Join Game</button>
+        <Button {...{variant: 'outlined', size: 'small', type: 'button', onClick: () => this.submitForm()}}>Join Game</Button>
       </form>
     );
   };
