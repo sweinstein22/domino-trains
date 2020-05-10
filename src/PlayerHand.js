@@ -168,7 +168,7 @@ class PlayerHand extends React.Component {
       const hangingDoubleTrainIndex = TrainActions.findHangingDoubleTrainIndex();
       if (hangingDoubleTrainIndex === -1) {
         store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `${players[handIndex]} won round ${round}!`});
-        PlayerHandActions.calculateScores();
+        ServerAPI.stateToServer();
       } else {
         PlayerHandActions.drawTile();
       }

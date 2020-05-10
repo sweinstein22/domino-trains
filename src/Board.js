@@ -1,13 +1,14 @@
 import React from 'react';
 import './Board.css';
 import {connect} from 'react-redux';
-import { Dialog, Table, TableHead, TableBody, TableRow, TableCell } from '@material-ui/core';
+import { Dialog, Button, Table, TableHead, TableBody, TableRow, TableCell } from '@material-ui/core';
 import store from './ReduxStore';
 import PlayerHand from "./PlayerHand";
 import JoinGameForm from "./JoinGameForm";
 import Toggle from "./Toggle";
 import Trains from "./Trains";
 import ServerAPI from "./ServerAPI";
+import PlayerHandActions from "./PlayerHandActions";
 
 class Board extends React.Component {
   constructor(props) {
@@ -70,6 +71,8 @@ class Board extends React.Component {
               )}
             </TableBody>
           </Table>
+          <br/>
+          <Button {...{onClick: PlayerHandActions.calculateScores}}>Start Next Round</Button>
         </Dialog>
         {!!playerCount && <span>
           <Toggle />

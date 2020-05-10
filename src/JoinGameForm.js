@@ -63,7 +63,7 @@ class JoinGameForm extends React.Component {
           </span>
         )}
         <br/><br/>
-        <Button {...{variant: 'outlined', size: 'small', type: 'button', onClick: () => this.submitForm()}}>Join Game</Button>
+        <Button {...{variant: 'outlined', size: 'small', type: 'button', onClick: () => this.submitForm()}}>Start Game</Button>
       </form>
     );
   };
