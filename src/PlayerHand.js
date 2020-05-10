@@ -154,7 +154,7 @@ class PlayerHand extends React.Component {
     if (!this.validateTrainAddition(trainIndex)) return;
 
     const {selectedTiles} = this.state;
-    const {hand, handIndex, trains, players, playersHands, round} = this.props;
+    const {dominosRemaining, hand, handIndex, trains, playersHands} = this.props;
     const newHand = hand.filter(domino => !selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1]));
 
     trains[trainIndex] = trains[trainIndex].concat(selectedTiles);
@@ -166,9 +166,8 @@ class PlayerHand extends React.Component {
 
     if (!newHand.length) {
       const hangingDoubleTrainIndex = TrainActions.findHangingDoubleTrainIndex();
-      if (hangingDoubleTrainIndex === -1) {
-        store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `${players[handIndex]} won round ${round}!`});
-        ServerAPI.stateToServer();
+      if (hangingDoubleTrainIndex === -1 || !TrainActions.disableTrain(trains[hangingDoubleTrainIndex]) || !dominosRemaining.length) {
+        PlayerHandActions.calculateScores({handIndex});
       } else {
         PlayerHandActions.drawTile();
       }

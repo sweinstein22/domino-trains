@@ -14,6 +14,7 @@ const TrainActions = {
     });
     if (valueFound) return false;
     playersHands.forEach(hand => hand.forEach(domino => {
+      if (!domino) return;
       if (domino[0] === neededTileValue || domino[1] === neededTileValue) valueFound = true;
     }));
     return !valueFound;

@@ -26,7 +26,7 @@ const PlayerHandActions = {
     ServerAPI.stateToServer();
   },
 
-  calculateScores: () => {
+  calculateScores: ({handIndex}) => {
     let {playersHands, round, scores, players} = store.getState();
     playersHands.forEach((hand, index) => {
       let sum = 0;
@@ -39,15 +39,23 @@ const PlayerHandActions = {
       const minScore = Math.min(...scores);
       const indexOfWinner = scores.indexOf(minScore);
 
-      store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `${players[indexOfWinner]} wins!!`});
-      ServerAPI.stateToServer();
+      store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `🎉 ${players[indexOfWinner]} wins!! 🎉`});
     } else {
-      store.dispatch({type: 'SET', path: ['round'], value: parseInt(round)-1});
-      ServerAPI.stateToServer();
-
-      ServerActions.endTurn();
-      store.generateStartingHands();
+      handIndex && store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `🎉 ${players[handIndex]} won round ${round}! 🎉`});
     }
+    ServerAPI.stateToServer();
+  },
+
+  startNextRound: () => {
+    const {round, playersHands} = store.getState();
+    if (playersHands.filter(hand => !hand.length)) PlayerHandActions.calculateScores({});
+    let nextRound = round === 0 ? 12 : parseInt(round)-1;
+    store.dispatch({type: 'SET', path: ['gameStateMessage'], value: ''});
+    store.dispatch({type: 'SET', path: ['round'], value: nextRound});
+    ServerAPI.stateToServer();
+
+    ServerActions.endTurn();
+    store.generateStartingHands();
   }
 };
 

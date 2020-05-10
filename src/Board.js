@@ -1,6 +1,7 @@
 import React from 'react';
 import './Board.css';
 import {connect} from 'react-redux';
+import Confetti from 'react-confetti'
 import { Dialog, Button, Table, TableHead, TableBody, TableRow, TableCell } from '@material-ui/core';
 import store from './ReduxStore';
 import PlayerHand from "./PlayerHand";
@@ -48,6 +49,10 @@ class Board extends React.Component {
     }
     return (
       <span>
+        {gameStateMessage && <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+        />}
         <Dialog {...{
           open: showScores,
           onEscapeKeyDown: this.closeScoresDialog,
@@ -72,7 +77,7 @@ class Board extends React.Component {
             </TableBody>
           </Table>
           <br/>
-          <Button {...{onClick: PlayerHandActions.calculateScores}}>Start Next Round</Button>
+          <Button {...{onClick: PlayerHandActions.startNextRound}}>Start Next Round</Button>
         </Dialog>
         {!!playerCount && <span>
           <Toggle />
