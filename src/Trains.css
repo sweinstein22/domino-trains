@@ -35,3 +35,11 @@
   text-align: center;
   margin: 10px 10px;
 }
+
+.train-row.disabled .train-name {
+  color: gray;
+}
+
+.train-row.disabled .dot {
+  background-color: gray;
+}

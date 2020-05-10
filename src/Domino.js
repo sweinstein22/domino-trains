@@ -45,7 +45,7 @@ export class Domino extends React.Component {
     const right = value[1];
     return (
       <span>
-        <div {...{className: classnames("domino selectable", className), id: tileIndex}}>
+        <div {...{className: classnames("domino", className, {"selectable": flipTile}), id: tileIndex}}>
           <div {...{id: tileIndex, className: classnames("left", this.dominoDotClassNames[left])}}>
             {this.generateDots(left)}
           </div>

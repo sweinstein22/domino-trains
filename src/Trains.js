@@ -4,15 +4,26 @@ import TrainIcon from '@material-ui/icons/Train';
 import {connect} from "react-redux";
 import './Trains.css';
 import Domino from "./Domino";
+import TrainActions from "./TrainActions";
 
 class Trains extends React.Component {
-  displayTrain = (train, index) => {
+  componentDidUpdate() {
+      const trainRows = document.querySelectorAll('.train-contents');
+      trainRows.forEach(row => {
+        row.scrollTo({
+          left: row.scrollWidth,
+          behavior: "smooth"
+        });
+      });
+  };
+
+  displayTrain = (train, index, disableTrain) => {
     const {players, publicTrains, playerIndex} = this.props;
     const isPublic = playerIndex === index || publicTrains[index] || index === players.length;
-    return (<div {...{key: index, className: 'train-row'}}>
+    return (<div {...{key: index, className: classnames('train-row', {'disabled': disableTrain})}}>
       <span {...{className: classnames("train-name", {'public-train': isPublic})}}>
         <TrainIcon/>
-        {index === players.length ? ` Mexican Train: ` : ` ${players[index]}:`}
+        {index === players.length ? ` Communal Train: ` : ` ${players[index]}'s Train:`}
       </span>
       <span className="train-contents">
         {Object.values(train).map((domino, key) =>
@@ -27,14 +38,14 @@ class Trains extends React.Component {
     const {trains} = this.props;
     return (
       <div className="trains">
-        {trains.map((train, index) => this.displayTrain(train, index))}
+        {trains.map((train, index) => this.displayTrain(train, index, TrainActions.disableTrain(train)))}
       </div>
     );
   };
 }
 
-const mapStateToProps = ({players, publicTrains, trains, view}) => ({
-  players, publicTrains, trains, playerIndex: parseInt(view)-1
+const mapStateToProps = ({dominosRemaining, players, playersHands, publicTrains, trains, view}) => ({
+  dominosRemaining, players, playersHands, publicTrains, trains, playerIndex: parseInt(view)-1
 });
 
 export default connect(mapStateToProps)(Trains);

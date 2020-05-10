@@ -8,6 +8,8 @@ import store from "./ReduxStore";
 import ServerAPI from "./ServerAPI";
 import PlayerHandActions from "./PlayerHandActions";
 import ServerActions from "./ServerActions";
+import TrainActions from "./TrainActions";
+import Welcome from "./Welcome";
 
 class PlayerHand extends React.Component {
   constructor(props) {
@@ -15,7 +17,8 @@ class PlayerHand extends React.Component {
     this.state = {
       selectedTiles: [],
       startingDragIndex: null,
-      stoppingDragIndex: null
+      stoppingDragIndex: null,
+      errorMessage: ''
     }
   }
 
@@ -75,6 +78,29 @@ class PlayerHand extends React.Component {
     this.setState({startingDragIndex: null, stoppingDragIndex: null});
   };
 
+  flipTile = ({tileIndex, newValue}) => {
+    const {selectedTiles} = this.state;
+    const originalTile = [newValue[1], newValue[0]];
+    let selectedTileIndex = -1;
+    if (selectedTiles.length && selectedTiles.some((selected, index) => {
+      if(selected[0] === originalTile[0] && selected[1] === originalTile[1]) {
+        selectedTileIndex = index;
+        return true;
+      }
+      return false;
+    })) {
+      selectedTiles[selectedTileIndex] = newValue;
+      this.setState({selectedTiles});
+    }
+
+    PlayerHandActions.flipTile({tileIndex, newValue})
+  };
+
+  endTurn = () => {
+    this.setState({errorMessage: ''});
+    ServerActions.endTurn()
+  };
+
   selectTile = (e) => {
     const {className, id} = e.target;
     if (!className || typeof className === "object") return;
@@ -86,7 +112,7 @@ class PlayerHand extends React.Component {
       const {hand} = this.props;
       const {selectedTiles} = this.state;
       const domino = hand[id];
-      if (!selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1])) {
+      if (!selectedTiles.length || !selectedTiles.some(selected => selected[0] === domino[0] && selected[1] === domino[1])) {
         this.setState({
           selectedTiles: selectedTiles.concat([domino])
         });
@@ -97,8 +123,35 @@ class PlayerHand extends React.Component {
     }
   };
 
+  clearSelectedTiles = () => {
+    this.setState({selectedTiles: []});
+  };
+
+  validateTrainAddition = (trainIndex) => {
+    const {trains} = this.props;
+    const {selectedTiles} = this.state;
+    const desiredTrain = trains[trainIndex];
+    const currentFinalTrainValue = desiredTrain[desiredTrain.length-1][1];
+    let isValid = true;
+
+    selectedTiles.forEach((tile, index) => {
+      if (index === 0) {
+        if (currentFinalTrainValue !== tile[0]) isValid = false;
+      } else {
+        if (tile[0] !== selectedTiles[index-1][1]) isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      this.setState({errorMessage: 'Error: invalid selection. Check that connected values match and try again.'})
+    }
+
+    return isValid;
+  };
+
   addToTrain = (trainIndex) => {
     if (!trainIndex && trainIndex !== 0) return;
+    if (!this.validateTrainAddition(trainIndex)) return;
 
     const {selectedTiles} = this.state;
     const {hand, handIndex, trains, players, playersHands, round} = this.props;
@@ -107,13 +160,18 @@ class PlayerHand extends React.Component {
     trains[trainIndex] = trains[trainIndex].concat(selectedTiles);
     playersHands[handIndex] = newHand;
 
-    this.setState({selectedTiles: []});
+    this.setState({selectedTiles: [], errorMessage: ''});
     store.dispatch({type: 'SET', path: ['trains'], value: trains});
     store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
 
     if (!newHand.length) {
-      store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `${players[handIndex]} won round ${round}!`});
-      PlayerHandActions.calculateScores();
+      const hangingDoubleTrainIndex = TrainActions.findHangingDoubleTrainIndex();
+      if (hangingDoubleTrainIndex === -1) {
+        store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `${players[handIndex]} won round ${round}!`});
+        PlayerHandActions.calculateScores();
+      } else {
+        PlayerHandActions.drawTile();
+      }
     } else {
       store.dispatch({type: 'SET', path: ['gameStateMessage'], value: ''});
       ServerAPI.stateToServer();
@@ -121,12 +179,12 @@ class PlayerHand extends React.Component {
   };
 
   render() {
-    const {hand, handIndex, publicTrains} = this.props;
-    const {selectedTiles} = this.state;
+    const {hand, handIndex, publicTrains, dominosRemaining} = this.props;
+    const {selectedTiles, errorMessage} = this.state;
     const trainIsPublic = publicTrains[handIndex];
     const isPlayersTurn = store.currentTurnPlayerIndex() === handIndex;
     if (handIndex === -1) {
-      return <div className="welcome">Welcome!</div>
+      return <Welcome/>
     } else if (!hand) {
       return <div className="loading-page">Loading...</div>
     }
@@ -137,7 +195,7 @@ class PlayerHand extends React.Component {
         <span {...{draggable: true, className: "draggable", key: index}}>
         <Domino {...{
           value: domino,
-          flipTile: PlayerHandActions.flipTile,
+          flipTile: this.flipTile,
           tileIndex: index,
           selectedIndex: tileIsSelected ? selectedTiles.findIndex(selected => selected[0] === domino[0] && selected[1] === domino[1]) + 1 : null,
           className: tileIsSelected ? 'selected-domino' : ''
@@ -151,12 +209,15 @@ class PlayerHand extends React.Component {
         <div className="hand">
           {isPlayersTurn && <span className="player-actions">
           <span>
-            <Button {...{variant: 'outlined', size: 'small', onClick: () => PlayerHandActions.drawTile()}}>Draw Tile</Button>
-            <Button {...{variant: 'outlined', size: 'small', onClick: () => PlayerHandActions.flipTrainState()}}>Make Train {trainIsPublic ? 'Private' : 'Public'}</Button>
-            <Button {...{variant: 'outlined', size: 'small', onClick: () => ServerActions.endTurn()}}>End Turn</Button>
+            <Button {...{disabled: !dominosRemaining.length, variant: 'outlined', size: 'small', onClick: () => PlayerHandActions.drawTile()}}>Draw Tile</Button>
+            <Button {...{variant: 'outlined', size: 'small', onClick: () => TrainActions.flipTrainState()}}>Make Train {trainIsPublic ? 'Private' : 'Public'}</Button>
+            <br/>
+            <Button {...{variant: 'outlined', size: 'small', onClick: this.clearSelectedTiles}}>Clear Selected Tiles</Button>
+            <Button {...{variant: 'outlined', size: 'small', onClick: this.endTurn}}>End Turn</Button>
           </span>
             <SubmitForm {...{addToTrain: this.addToTrain}} />
         </span>}
+          <span className="error-message">{errorMessage}</span>
           <span className="domino-section">
         {dominos}
         </span>

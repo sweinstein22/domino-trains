@@ -68,16 +68,12 @@ export class ReduxStore {
     this.store.dispatch(action);
   };
 
-  subscribe(callback) {
-    this.store.subscribe(callback);
-  };
-
   generateStartingHands() {
     const {dominos, playerCount, round} = this.getState();
 
     let tilesPerHand;
     if (playerCount < 4) {
-      tilesPerHand = 8;
+      tilesPerHand = 15;
     } else if (playerCount < 7) {
       tilesPerHand = 12;
     } else {

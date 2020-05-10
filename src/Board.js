@@ -28,7 +28,7 @@ class Board extends React.Component {
   };
 
   render() {
-    const {currentTurnPlayer,gameStateMessage, playerCount, players, round, scores, showScores} = this.props;
+    const {currentTurnPlayer, gameStateMessage, playerCount, players, playersHands, round, scores, showScores} = this.props;
     let content;
     if (playerCount === null || playerCount === undefined) {
       content = (
@@ -49,23 +49,24 @@ class Board extends React.Component {
       <span>
         <Dialog {...{
           open: showScores,
-          onClose: this.closeScoresDialog,
           onEscapeKeyDown: this.closeScoresDialog,
           onBackdropClick: this.closeScoresDialog
         }}>
-          <Table>
+          <Table className="score-table">
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Score</TableCell>
+                <TableCell className="current-round">Current Round Tile Count</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {players.map((name, index) =>
                 (<TableRow key={index}>
                   <TableCell>{name}</TableCell>
-                  <TableCell>{scores[index]}
-                </TableCell></TableRow>)
+                  <TableCell>{scores[index]}</TableCell>
+                  <TableCell className="current-round">{playersHands[index] && playersHands[index].length}</TableCell>
+                </TableRow>)
               )}
             </TableBody>
           </Table>
@@ -85,11 +86,11 @@ class Board extends React.Component {
 
 const mapStateToProps = (
   {currentTurnPlayer, gameStateMessage, dominosRemaining, playerCount,
-    players, publicTrains, round, scores, showScores, trains
+    players, playersHands, publicTrains, round, scores, showScores, trains
   }) => (
   {
     currentTurnPlayer, gameStateMessage, dominosRemaining, playerCount,
-    players, publicTrains, round, scores, showScores, trains
+    players, playersHands, publicTrains, round, scores, showScores, trains
   }
 );
 

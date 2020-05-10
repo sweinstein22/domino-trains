@@ -1,7 +1,7 @@
 body {
   height: 100%;
   color: white;
-  font-size: 20px;
+  font-size: 16px;
   text-align: center;
   background-color: #282c34;
   -ms-overflow-style: none;
@@ -39,4 +39,12 @@ button:hover {
 svg {
   top: .2em;
   position: relative;
+}
+
+.score-table {
+  text-align-last: center;
+}
+
+.score-table .current-round {
+  border-left: solid 2px gray;
 }

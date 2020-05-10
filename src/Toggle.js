@@ -44,7 +44,7 @@ class Toggle extends React.Component {
             </Button>
           )}
           <Button {...{variant: 'outlined', size: 'small', onClick: () => this.showScores()}}>
-            View Scores
+            View Game State
           </Button>
         </span>
       </div>

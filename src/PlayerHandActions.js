@@ -3,15 +3,6 @@ import ServerAPI from "./ServerAPI";
 import ServerActions from "./ServerActions";
 
 const PlayerHandActions = {
-  flipTrainState: () => {
-    const {publicTrains, view} = store.getState();
-    const handIndex = parseInt(view)-1;
-    publicTrains[handIndex] = !publicTrains[handIndex];
-
-    store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
-    ServerAPI.stateToServer();
-  },
-
   drawTile: () => {
     let {dominosRemaining, playersHands: newPlayersHands, view} = store.getState();
     const handIndex = parseInt(view)-1;

@@ -1,6 +1,6 @@
 import store from './ReduxStore';
 
-const firebase = require("firebase");
+const firebase = require("firebase/app");
 
 const firebaseConfig = {
   apiKey: "AIzaSyCmR4kKqsWz4NNEeaI4wfMLPgbkS8jCb_8",
@@ -80,13 +80,17 @@ const ServerAPI = {
   },
 
   parsePlayerState: ({value}) => {
-    let {playersHands, publicTrains} = store.getState();
-    Object.keys(value).forEach(index => {
-      playersHands[index] = JSON.parse(value[index].hand);
-      publicTrains[index] = value[index].isPublic;
-    });
-    store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
-    store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
+    try {
+      let {playersHands, publicTrains} = store.getState();
+      Object.keys(value).forEach(index => {
+        playersHands[index] = JSON.parse(value[index].hand);
+        publicTrains[index] = value[index].isPublic;
+      });
+      store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
+      store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
+    } catch (e) {
+      console.log(e);
+    }
   },
 
   stringifyPlayerState: ({sendAll}) => {
@@ -109,10 +113,14 @@ const ServerAPI = {
   },
 
   parseSimpleEndpoints: ({key, value}) => {
-    let dataFromServer = typeof value === 'object' && Object.keys(value).includes('value') ? value.value : value;
-    store.dispatch({
-      type: 'SET', path: [key], value: dataFromServer
-    });
+    try {
+      let dataFromServer = typeof value === 'object' && Object.keys(value).includes('value') ? value.value : value;
+      store.dispatch({
+        type: 'SET', path: [key], value: dataFromServer
+      });
+    } catch (e) {
+      console.log(key, e)
+    }
   },
 
   stringifySimpleEndpoints: ({key}) => {

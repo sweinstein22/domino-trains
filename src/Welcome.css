@@ -1,0 +1,16 @@
+.container {
+  width: 50%;
+  max-height: 90vh;
+}
+
+.welcome {
+  padding: 0 40px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.list {
+  text-align: left;
+}

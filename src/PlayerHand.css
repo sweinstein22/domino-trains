@@ -1,4 +1,4 @@
-.welcome, .loading-page {
+.loading-page {
   width: 50%;
   max-height: 90vh;
   font-style: italic;
@@ -21,6 +21,11 @@
   display: flex;
   margin: 10px 40px;
   justify-content: space-between;
+}
+
+.error-message {
+  display: flex;
+  justify-content: center;
 }
 
 .domino-section {
