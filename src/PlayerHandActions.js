@@ -1,6 +1,7 @@
 import store from './ReduxStore';
 import ServerAPI from "./ServerAPI";
 import ServerActions from "./ServerActions";
+import TrainActions from "./TrainActions";
 
 const PlayerHandActions = {
   drawTile: () => {
@@ -26,8 +27,27 @@ const PlayerHandActions = {
     ServerAPI.stateToServer();
   },
 
-  calculateScores: ({handIndex}) => {
-    let {playersHands, round, scores, players} = store.getState();
+  checkForWin: () => {
+    let {dominosRemaining, playersHands, round, scores, players, trains} = store.getState();
+    playersHands.forEach((hand, index) => {
+      if (!hand.length) {
+        const hangingDoubleTrainIndex = TrainActions.findHangingDoubleTrainIndex();
+        if (hangingDoubleTrainIndex === -1 || TrainActions.disableTrain(trains[hangingDoubleTrainIndex]) || !dominosRemaining.length) {
+          if (round === 0) {
+            const minScore = Math.min(...scores);
+            const indexOfWinner = scores.indexOf(minScore);
+
+            store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `🎉 ${players[indexOfWinner]} wins!! 🎉`});
+          } else {
+            store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `🎉 ${players[index]} won round ${round}! 🎉`});
+          }
+        }
+      }
+    });
+  },
+
+  calculateScores: () => {
+    let {playersHands, scores} = store.getState();
     playersHands.forEach((hand, index) => {
       let sum = 0;
       hand.forEach(domino => sum = sum + parseInt(domino[0]) + parseInt(domino[1]));
@@ -35,20 +55,14 @@ const PlayerHandActions = {
     });
 
     store.dispatch({type: 'SET', path: ['scores'], value: scores});
-    if (round === 0) {
-      const minScore = Math.min(...scores);
-      const indexOfWinner = scores.indexOf(minScore);
 
-      store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `🎉 ${players[indexOfWinner]} wins!! 🎉`});
-    } else {
-      handIndex && store.dispatch({type: 'SET', path: ['gameStateMessage'], value: `🎉 ${players[handIndex]} won round ${round}! 🎉`});
-    }
+    PlayerHandActions.checkForWin();
     ServerAPI.stateToServer();
   },
 
   startNextRound: () => {
     const {round, playersHands} = store.getState();
-    if (playersHands.filter(hand => !hand.length)) PlayerHandActions.calculateScores({});
+    if (!playersHands.filter(hand => !hand.length).length) PlayerHandActions.calculateScores();
     let nextRound = round === 0 ? 12 : parseInt(round)-1;
     store.dispatch({type: 'SET', path: ['gameStateMessage'], value: ''});
     store.dispatch({type: 'SET', path: ['round'], value: nextRound});

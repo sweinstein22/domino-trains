@@ -11,7 +11,7 @@ class Welcome extends React.Component {
         <br/>
         <div>Select your name from the list of players above to view your hand.</div>
         <br/>
-        <div>Train names highlighted in gold are available for you to play on.</div>
+        <div>Train names highlighted in gold are public and available for you to play on.</div>
         <div>Use the rotate icon to flip a tile's orientation, and drag tiles to reorder them.</div>
         <br/>
 

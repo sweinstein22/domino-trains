@@ -18,8 +18,8 @@ class Trains extends React.Component {
   };
 
   displayTrain = (train, index, disableTrain) => {
-    const {players, publicTrains, playerIndex} = this.props;
-    const isPublic = playerIndex === index || publicTrains[index] || index === players.length;
+    const {players, publicTrains} = this.props;
+    const isPublic = publicTrains[index] || index === players.length;
     return (<div {...{key: index, className: classnames('train-row', {'disabled': disableTrain})}}>
       <span {...{className: classnames("train-name", {'public-train': isPublic})}}>
         <TrainIcon/>

@@ -18,6 +18,7 @@ class Board extends React.Component {
   };
 
   componentDidMount() {
+    PlayerHandActions.checkForWin();
     this.interval = setInterval(() => ServerAPI.pollServerState(), 5000);
   };
 
@@ -30,11 +31,11 @@ class Board extends React.Component {
   };
 
   render() {
-    const {currentTurnPlayer, gameStateMessage, playerCount, players, playersHands, round, scores, showScores} = this.props;
+    const {currentTurnPlayer, gameStateMessage, password, playerCount, players, playersHands, round, scores, showScores} = this.props;
     let content;
-    if (playerCount === null || playerCount === undefined) {
+    if (!playerCount || !password) {
       content = (
-        <JoinGameForm/>
+        <JoinGameForm {...{password, playerCount}}/>
       )
     } else if (players) {
       content = (
@@ -93,11 +94,11 @@ class Board extends React.Component {
 }
 
 const mapStateToProps = (
-  {currentTurnPlayer, gameStateMessage, dominosRemaining, playerCount,
+  {currentTurnPlayer, gameStateMessage, dominosRemaining, password, playerCount,
     players, playersHands, publicTrains, round, scores, showScores, trains
   }) => (
   {
-    currentTurnPlayer, gameStateMessage, dominosRemaining, playerCount,
+    currentTurnPlayer, gameStateMessage, dominosRemaining, password, playerCount,
     players, playersHands, publicTrains, round, scores, showScores, trains
   }
 );

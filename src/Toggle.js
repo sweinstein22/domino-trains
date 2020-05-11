@@ -16,17 +16,17 @@ class Toggle extends React.Component {
   };
 
   render() {
-    const {playerCount, players, view} = this.props;
+    const {password, playerCount, players, view} = this.props;
     if (!players) return null;
     return (
       <div className="toggle">
         <span>
-          <Button {...{
+          {password && <Button {...{
             variant: 'outlined', size: 'small',
             onClick: async () => {
             store.resetStore();
             ServerAPI.resetServerState();
-          }}}>Reset Game</Button>
+          }}}>Reset Game</Button>}
         </span>
         <span>
           <Button {...{
@@ -52,8 +52,8 @@ class Toggle extends React.Component {
   }
 }
 
-const mapStateToProps = ({playerCount, players, view}) => ({
-  playerCount, players, view
+const mapStateToProps = ({password, playerCount, players, view}) => ({
+  password, playerCount, players, view
 });
 
 export default connect(mapStateToProps)(Toggle);
