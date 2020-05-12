@@ -127,7 +127,7 @@ const ServerAPI = {
     const stateAtKey = store.getState()[key];
     let value;
     if (!stateAtKey) {
-      value = key === 'playerCount' ? {value: stateAtKey} : [];
+      value = key === 'playerCount' || key === 'gameStateMessage' || key === 'round' ? {value: stateAtKey} : [];
     }
     switch (typeof stateAtKey) {
       case 'array':
