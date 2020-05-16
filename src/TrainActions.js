@@ -35,7 +35,7 @@ const TrainActions = {
     let hangingDoubleTrainIndex = -1;
     trains.forEach((train, index) => {
       const lastTile = train[train.length - 1];
-      if (lastTile[0] === lastTile[1]) {
+      if (train.length > 1 && lastTile[0] === lastTile[1]) {
         hangingDoubleTrainIndex = index
       }
     });

@@ -5,6 +5,7 @@ import store from './ReduxStore';
 import { Dialog, Button, Table, TableHead, TableBody, TableRow, TableCell } from '@material-ui/core';
 import './Colors.css';
 import './Dialog.css';
+import ServerAPI from "./ServerAPI";
 import PlayerHandActions from './PlayerHandActions';
 import TrainActions from './TrainActions';
 
@@ -46,8 +47,6 @@ class BoardDialog extends React.Component {
               )}
             </TableBody>
           </Table>
-          <br/>
-          <Button {...{onClick: PlayerHandActions.startNextRound}}>Start Next Round</Button>
             </Dialog>
       );
     } else if (showSettings) {
@@ -68,6 +67,20 @@ class BoardDialog extends React.Component {
                 onClick: () => TrainActions.setTrainColor(color)
               }}/>
             )}
+            </div>
+            <hr/>
+            <br/>
+            <div className="danger-button-zone">
+              <Button {...{
+                variant: 'outlined', size: 'small',
+                onClick: async () => {
+                store.resetStore();
+                ServerAPI.resetServerState();
+              }}}>Reset Game</Button>
+                <Button {...{
+                  variant: 'outlined', size: 'small',
+                  onClick: PlayerHandActions.startNextRound
+                }}>Start Next Round</Button>
             </div>
           </div>
         </Dialog>

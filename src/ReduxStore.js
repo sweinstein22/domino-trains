@@ -83,7 +83,7 @@ export class ReduxStore {
       tilesPerHand = 10;
     }
 
-    let dominosRemaining = dominos;
+    let dominosRemaining = Array.from(dominos);
     dominosRemaining.splice(round, 1);
 
     let publicTrains = Array.from({length: parseInt(playerCount)+1}).fill(false);

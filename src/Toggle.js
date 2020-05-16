@@ -2,7 +2,6 @@ import React from 'react';
 import classnames from 'classnames';
 import { Button } from '@material-ui/core';
 import './Toggle.css';
-import ServerAPI from "./ServerAPI";
 import {connect} from "react-redux";
 import store from "./ReduxStore";
 
@@ -16,18 +15,10 @@ class Toggle extends React.Component {
   };
 
   render() {
-    const {password, playerCount, players, view} = this.props;
+    const {playerCount, players, view} = this.props;
     if (!players) return null;
     return (
       <div className="toggle">
-        <span>
-          {password && <Button {...{
-            variant: 'outlined', size: 'small',
-            onClick: async () => {
-            store.resetStore();
-            ServerAPI.resetServerState();
-          }}}>Reset Game</Button>}
-        </span>
         <span>
           <Button {...{
             variant: 'outlined', size: 'small',
@@ -43,6 +34,8 @@ class Toggle extends React.Component {
               Player {index + 1}: {players[index]}
             </Button>
           )}
+        </span>
+        <span>
           <Button {...{variant: 'outlined', size: 'small', onClick: () => this.showScores()}}>
             View Game State
           </Button>
@@ -52,8 +45,8 @@ class Toggle extends React.Component {
   }
 }
 
-const mapStateToProps = ({password, playerCount, players, view}) => ({
-  password, playerCount, players, view
+const mapStateToProps = ({playerCount, players, view}) => ({
+  playerCount, players, view
 });
 
 export default connect(mapStateToProps)(Toggle);

@@ -24,3 +24,12 @@
   -moz-box-shadow: 0 0 10px 4px rgba(91,162,217,1);
   box-shadow: 0 0 10px 4px rgba(91,162,217,1);
 }
+
+.danger-button-zone {
+  display: flex;
+  justify-content: space-between;
+}
+
+.danger-button-zone button:hover {
+  background-color: #a80f00;
+}

@@ -50,7 +50,7 @@ class Board extends React.Component {
           height={window.innerHeight}
         />}
             <Dialog/>
-        {!!playerCount && <span>
+        {!!playerCount && !!password && <span>
           <Toggle />
           <div className="round">Round: {round}, {currentTurnPlayer}'s Turn</div>
           {gameStateMessage && <div>{gameStateMessage}</div>}
