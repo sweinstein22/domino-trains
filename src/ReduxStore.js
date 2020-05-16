@@ -1,6 +1,7 @@
 import {createStore} from 'redux';
 import _ from 'lodash';
 import ServerAPI from "./ServerAPI";
+import TrainActions from './TrainActions';
 
 const reducerFunc = (state = initialState, action) => {
   switch (action.type) {
@@ -42,6 +43,8 @@ const initialState = {
   round: 12,
   scores: [],
   showScores: false,
+  showSettings: false,
+  trainColors: [],
   trains: [],
   view: 0,
 };
@@ -69,7 +72,7 @@ export class ReduxStore {
   };
 
   generateStartingHands() {
-    const {dominos, playerCount, round} = this.getState();
+    let {dominos, playerCount, trainColors, round} = this.getState();
 
     let tilesPerHand;
     if (playerCount < 4) {
@@ -90,6 +93,14 @@ export class ReduxStore {
     const trains = Array.from({length: parseInt(playerCount)+1}).fill([[0, round]]);
     this.dispatch({type: 'SET', path: ['trains'], value: trains});
 
+    if (!trainColors.length) {
+      trainColors = Array.from({length: parseInt(playerCount)});
+      const colorOptions = TrainActions.getTrainColorOptions();
+      trainColors.forEach((_, index) => {
+        trainColors[index] = colorOptions[index];
+      });
+    }
+
     let playersHands = Array.from({length: playerCount}).fill([]);
     for (let i = 0; i < tilesPerHand; i++) {
       for (let j = 0; j < playerCount; j++) {
@@ -100,6 +111,7 @@ export class ReduxStore {
     }
     this.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
     this.dispatch({type: 'SET', path: ['dominosRemaining'], value: dominosRemaining});
+    this.dispatch({type: 'SET', path: ['trainColors'], value: trainColors});
 
     ServerAPI.initServerState();
   };

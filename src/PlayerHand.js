@@ -2,6 +2,7 @@ import React from 'react';
 import './PlayerHand.css';
 import {connect} from "react-redux";
 import { Button } from '@material-ui/core';
+import SettingsIcon from '@material-ui/icons/Settings';
 import Domino from "./Domino";
 import SubmitForm from "./SubmitForm";
 import store from "./ReduxStore";
@@ -178,6 +179,10 @@ class PlayerHand extends React.Component {
     }
   };
 
+  showSettings = () => {
+    store.dispatch({type: 'SET', path: ['showSettings'], value: true})
+  };
+
   render() {
     const {hand, handIndex, publicTrains, dominosRemaining} = this.props;
     const {selectedTiles, errorMessage} = this.state;
@@ -221,6 +226,7 @@ class PlayerHand extends React.Component {
           <span className="domino-section">
         {dominos}
         </span>
+          <div className="settings-section"><SettingsIcon onClick={() => this.showSettings()}/></div>
         </div>
       </div>
     );

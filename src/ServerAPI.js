@@ -81,32 +81,34 @@ const ServerAPI = {
 
   parsePlayerState: ({value}) => {
     try {
-      let {playersHands, publicTrains} = store.getState();
+      let {playersHands, publicTrains, trainColors} = store.getState();
       Object.keys(value).forEach(index => {
         playersHands[index] = JSON.parse(value[index].hand);
         publicTrains[index] = value[index].isPublic;
+        trainColors[index] = value[index].trainColor;
       });
       store.dispatch({type: 'SET', path: ['playersHands'], value: playersHands});
       store.dispatch({type: 'SET', path: ['publicTrains'], value: publicTrains});
+      store.dispatch({type: 'SET', path: ['trainColors'], value: trainColors});
     } catch (e) {
       console.log(e);
     }
   },
 
   stringifyPlayerState: ({sendAll}) => {
-    const {playersHands, publicTrains, view} = store.getState();
+    const {playersHands, publicTrains, trainColors, view} = store.getState();
     if (!playersHands.length) return;
 
     let value = {};
     if (sendAll) {
       playersHands.forEach((hand, index) => {
-        value[index] = {index, hand: JSON.stringify(hand), isPublic: publicTrains[index]};
+        value[index] = {index, hand: JSON.stringify(hand), isPublic: publicTrains[index], trainColor: trainColors[index]};
       });
       return JSON.stringify({value});
     } else {
       if (view && view !== 0) {
         const index = parseInt(view)-1;
-        value[index] = {index, hand: JSON.stringify(playersHands[index]), isPublic: publicTrains[index]};
+        value[index] = {index, hand: JSON.stringify(playersHands[index]), isPublic: publicTrains[index], trainColor: trainColors[index]};
         return JSON.stringify({value});
       }
     }
@@ -125,19 +127,7 @@ const ServerAPI = {
 
   stringifySimpleEndpoints: ({key}) => {
     const stateAtKey = store.getState()[key];
-    let value;
-    if (!stateAtKey) {
-      value = key === 'playerCount' || key === 'gameStateMessage' || key === 'round' ? {value: stateAtKey} : [];
-    }
-    switch (typeof stateAtKey) {
-      case 'array':
-        value = stateAtKey.length ? stateAtKey : [];
-        break;
-      default:
-        value = {value: stateAtKey};
-        break;
-    }
-    return JSON.stringify(value);
+    return JSON.stringify({value: stateAtKey});
   },
 };
 

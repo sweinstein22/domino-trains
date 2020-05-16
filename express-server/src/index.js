@@ -31,7 +31,7 @@ app.options('*', (req, res) => {
 const simpleEndpoint = async (endpoint, req, res) => {
   try {
     if (req.method === 'GET') {
-      let value = await storage.getItem(endpoint) || [];
+      let value = await storage.getItem(endpoint) || '';
       res.status(200).json(value);
     } else if (req.method === 'POST') {
       await storage.setItem(endpoint, req.body);

@@ -40,6 +40,15 @@ const TrainActions = {
       }
     });
     return hangingDoubleTrainIndex;
+  },
+
+  getTrainColorOptions: () => ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'indigo', 'violet', 'magenta'],
+
+  setTrainColor: (color) => {
+    let {trainColors, view} = store.getState();
+    trainColors[view-1] = color;
+    store.dispatch({type: 'SET', path: ['trainColors'], value: trainColors});
+    ServerAPI.stateToServer();
   }
 };
 

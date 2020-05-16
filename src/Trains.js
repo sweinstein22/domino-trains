@@ -2,6 +2,7 @@ import React from 'react';
 import classnames from 'classnames';
 import TrainIcon from '@material-ui/icons/Train';
 import {connect} from "react-redux";
+import './Colors.css';
 import './Trains.css';
 import Domino from "./Domino";
 import TrainActions from "./TrainActions";
@@ -18,10 +19,10 @@ class Trains extends React.Component {
   };
 
   displayTrain = (train, index, disableTrain) => {
-    const {players, publicTrains} = this.props;
+    const {players, publicTrains, trainColors} = this.props;
     const isPublic = publicTrains[index] || index === players.length;
     return (<div {...{key: index, className: classnames('train-row', {'disabled': disableTrain})}}>
-      <span {...{className: classnames("train-name", {'public-train': isPublic})}}>
+      <span {...{className: classnames("train-name", trainColors[index], {'public-train': isPublic})}}>
         <TrainIcon/>
         {index === players.length ? ` Communal Train: ` : ` ${players[index]}'s Train:`}
       </span>
@@ -44,8 +45,8 @@ class Trains extends React.Component {
   };
 }
 
-const mapStateToProps = ({dominosRemaining, players, playersHands, publicTrains, trains, view}) => ({
-  dominosRemaining, players, playersHands, publicTrains, trains, playerIndex: parseInt(view)-1
+const mapStateToProps = ({dominosRemaining, players, playersHands, publicTrains, trainColors, trains, view}) => ({
+  dominosRemaining, players, playersHands, publicTrains, trainColors, trains, playerIndex: parseInt(view)-1
 });
 
 export default connect(mapStateToProps)(Trains);

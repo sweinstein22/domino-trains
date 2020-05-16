@@ -2,8 +2,7 @@ import React from 'react';
 import './Board.css';
 import {connect} from 'react-redux';
 import Confetti from 'react-confetti'
-import { Dialog, Button, Table, TableHead, TableBody, TableRow, TableCell } from '@material-ui/core';
-import store from './ReduxStore';
+import Dialog from "./Dialog";
 import PlayerHand from "./PlayerHand";
 import JoinGameForm from "./JoinGameForm";
 import Toggle from "./Toggle";
@@ -26,12 +25,8 @@ class Board extends React.Component {
     clearInterval(this.interval);
   };
 
-  closeScoresDialog = () => {
-    store.dispatch({type: 'SET', path: ['showScores'], value: false});
-  };
-
   render() {
-    const {currentTurnPlayer, gameStateMessage, password, playerCount, players, playersHands, round, scores, showScores} = this.props;
+    const {currentTurnPlayer, gameStateMessage, password, playerCount, players, round} = this.props;
     let content;
     if (!playerCount || !password) {
       content = (
@@ -54,32 +49,7 @@ class Board extends React.Component {
           width={window.innerWidth}
           height={window.innerHeight}
         />}
-        <Dialog {...{
-          open: showScores,
-          onEscapeKeyDown: this.closeScoresDialog,
-          onBackdropClick: this.closeScoresDialog
-        }}>
-          <Table className="score-table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Score</TableCell>
-                <TableCell className="current-round">Current Round Tile Count</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {players.map((name, index) =>
-                (<TableRow key={index}>
-                  <TableCell>{name}</TableCell>
-                  <TableCell>{scores[index]}</TableCell>
-                  <TableCell className="current-round">{playersHands[index] && playersHands[index].length}</TableCell>
-                </TableRow>)
-              )}
-            </TableBody>
-          </Table>
-          <br/>
-          <Button {...{onClick: PlayerHandActions.startNextRound}}>Start Next Round</Button>
-        </Dialog>
+            <Dialog/>
         {!!playerCount && <span>
           <Toggle />
           <div className="round">Round: {round}, {currentTurnPlayer}'s Turn</div>
@@ -95,11 +65,11 @@ class Board extends React.Component {
 
 const mapStateToProps = (
   {currentTurnPlayer, gameStateMessage, dominosRemaining, password, playerCount,
-    players, playersHands, publicTrains, round, scores, showScores, trains
+    players, publicTrains, round, trains
   }) => (
   {
     currentTurnPlayer, gameStateMessage, dominosRemaining, password, playerCount,
-    players, playersHands, publicTrains, round, scores, showScores, trains
+    players, publicTrains, round, trains
   }
 );
 
