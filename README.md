@@ -8,6 +8,23 @@ login with `firebase login`
 run `firebase serve` to serve up the app locally
 run `firebase deploy` to deploy the application
 
+## Deploying multiple versions of the app
+
+Currently this app is not set up to support multiple games at once. If you would
+like to deploy a second instance of the app, set up an additional app in the
+same firebase project.
+
+Adjust settings following guidelines in [this
+article](https://firebase.googleblog.com/2018/08/one-project-multiple-sites-plus-boost.html)
+(Note: adjustments to the `firebase.json` hosting object to have a separate
+entry for each site and adding targets using the CLI are both necessary steps)
+
+Change the server address and config details in `src/ServerAPI.js`. (Config
+details can be found under settings for the web app, select CDN under the 'Firebase
+SDK Snippet' section)
+
+Run `firebase deploy --only hosting:domino-trains-x` to deploy to the xth instance of the game
+
 ## Deploy server app
 
 Deployed using Heroku

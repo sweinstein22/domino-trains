@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "domino-trains"
+  },
+  "targets": {
+    "domino-trains": {
+      "hosting": {
+        "domino-trains-2": [
+          "domino-trains-2"
+        ],
+        "domino-trains": [
+          "domino-trains"
+        ]
+      }
+    }
   }
 }
