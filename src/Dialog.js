@@ -37,6 +37,10 @@ class BoardDialog extends React.Component {
 
     let content = <span/>;
     if (showScores) {
+      const rankedPlayers = players.reduce((memo, name, index) =>
+        [...memo, {name, score: scores[index], currentTileCount: playersHands[index] ? playersHands[index].length : ''}], []).sort(
+          (playerA, playerB) => playerA.score - playerB.score
+        );
       content = (
         <Dialog {...{
           open: showScores,
@@ -52,11 +56,11 @@ class BoardDialog extends React.Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {players.map((name, index) =>
+              {rankedPlayers.map(({name, score, currentTileCount}, index) =>
                 (<TableRow key={index}>
                   <TableCell>{name}</TableCell>
-                  <TableCell>{scores[index]}</TableCell>
-                  <TableCell className="current-round">{playersHands[index] && playersHands[index].length}</TableCell>
+                  <TableCell>{score}</TableCell>
+                  <TableCell className="current-round">{currentTileCount}</TableCell>
                 </TableRow>)
               )}
             </TableBody>
