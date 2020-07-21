@@ -49,8 +49,8 @@ const ServerAPI = {
   },
 
   initServerState: async () => {
-    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
     ServerAPI.postToServer({key: 'playerState', value: await ServerAPI.stringifyPlayerState({sendAll: true})});
+    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
   },
 
   resetServerState: async () => {
@@ -61,11 +61,12 @@ const ServerAPI = {
   stateToServer: async () => {
     const {view, playerCount} = store.getState();
     if (playerCount === null) return;
-    if (store.currentTurnPlayerIndex() === parseInt(view)-1) {
-      ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
-    }
+
     if (view && view !== 0) {
       ServerAPI.postToServer({key: 'playerState', value: await ServerAPI.stringifyPlayerState({sendAll: false})});
+    }
+    if (store.currentTurnPlayerIndex() === parseInt(view)-1) {
+      ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
     }
   },
 
@@ -73,10 +74,10 @@ const ServerAPI = {
     const {playerCount, fetchInProgress} = store.getState();
     if (fetchInProgress) return;
 
-    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.parseSimpleEndpoints({key, value: await ServerAPI.getFromServer({key})}));
     if (playerCount) {
       ServerAPI.parsePlayerState({value: await ServerAPI.getFromServer({key: 'playerState'})});
     }
+    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.parseSimpleEndpoints({key, value: await ServerAPI.getFromServer({key})}));
   },
 
   parsePlayerState: ({value}) => {
