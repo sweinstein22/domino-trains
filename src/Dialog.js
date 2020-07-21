@@ -10,6 +10,14 @@ import PlayerHandActions from './PlayerHandActions';
 import TrainActions from './TrainActions';
 
 class BoardDialog extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      resetNeedsConfirmation: true,
+      nextRoundNeedsConfirmation: true
+    };
+  };
+
   closeScoresDialog = () => {
     store.dispatch({type: 'SET', path: ['showScores'], value: false});
   };
@@ -18,8 +26,14 @@ class BoardDialog extends React.Component {
     store.dispatch({type: 'SET', path: ['showSettings'], value: false});
   };
 
+  closeGameOptionsDialog = () => {
+    this.setState({resetNeedsConfirmation: true, nextRoundNeedsConfirmation: true})
+    store.dispatch({type: 'SET', path: ['showGameOptions'], value: false});
+  };
+
   render() {
-    const {players, playersHands, scores, showScores, showSettings, trainColors, view} = this.props;
+    const {players, playersHands, scores, showGameOptions, showScores, showSettings, trainColors, view} = this.props;
+    const {resetNeedsConfirmation, nextRoundNeedsConfirmation} = this.state;
 
     let content = <span/>;
     if (showScores) {
@@ -47,7 +61,7 @@ class BoardDialog extends React.Component {
               )}
             </TableBody>
           </Table>
-            </Dialog>
+        </Dialog>
       );
     } else if (showSettings) {
       const colors = TrainActions.getTrainColorOptions();
@@ -59,39 +73,92 @@ class BoardDialog extends React.Component {
         }}>
           <div className="settings">
             <div>Select your train color:</div>
-            <div>
-            {colors.map((color, index) =>
-              <span {...{
-                key: index,
-                className: classnames('color-swatch', `${color}-swatch`, {'selected-color-swatch': color === trainColors[view-1]}),
-                onClick: () => TrainActions.setTrainColor(color)
-              }}/>
-            )}
+              <div>
+                {colors.map((color, index) =>
+                  <span {...{
+                    key: index,
+                    className: classnames('color-swatch', `${color}-swatch`, {'selected-color-swatch': color === trainColors[view-1]}),
+                    onClick: () => TrainActions.setTrainColor(color)
+                  }}/>
+                )}
+              </div>
             </div>
+          </Dialog>
+      );
+    } else if (showGameOptions) {
+      let dialogContent = <span/>;
+      if (resetNeedsConfirmation && nextRoundNeedsConfirmation) {
+        dialogContent = (
+          <span>
+            <Button {...{
+              variant: 'outlined', size: 'small',
+              onClick: () => this.setState({resetNeedsConfirmation: false})
+            }}>Reset Game</Button>
+              <Button {...{
+                variant: 'outlined', size: 'small',
+                onClick: () => this.setState({nextRoundNeedsConfirmation: false})
+              }}>Start Next Round</Button>
+            </span>
+        )
+      } else if (!resetNeedsConfirmation) {
+        dialogContent = (
+          <span>
+            Reset Game
             <hr/>
-            <br/>
-            <div className="danger-button-zone">
+            Are you sure? &nbsp;
               <Button {...{
                 variant: 'outlined', size: 'small',
                 onClick: async () => {
-                store.resetStore();
-                ServerAPI.resetServerState();
-              }}}>Reset Game</Button>
-                <Button {...{
-                  variant: 'outlined', size: 'small',
-                  onClick: PlayerHandActions.startNextRound
-                }}>Start Next Round</Button>
-            </div>
+                  this.closeGameOptionsDialog();
+                  store.resetStore();
+                  ServerAPI.resetServerState();
+                }
+              }}>Yes</Button>
+              <Button {...{
+                variant: 'outlined', size: 'small',
+                onClick: () => this.setState({resetNeedsConfirmation: true})
+              }}>No</Button>
+          </span>
+        )
+      } else if (!nextRoundNeedsConfirmation) {
+        dialogContent = (
+          <span>
+            Start Next Round
+            <hr/>
+            Are you sure? &nbsp;
+              <Button {...{
+                variant: 'outlined', size: 'small',
+                onClick: () => {
+                  this.closeGameOptionsDialog();
+                  PlayerHandActions.startNextRound();
+                }
+              }}>Yes</Button>
+              <Button {...{
+                variant: 'outlined', size: 'small',
+                onClick: () => this.setState({nextRoundNeedsConfirmation: true})
+              }}>No</Button>
+          </span>
+        );
+      }
+
+      content = (<Dialog {...{
+        open: showGameOptions,
+        onEscapeKeyDown: this.closeGameOptionsDialog,
+        onBackdropClick: this.closeGameOptionsDialog
+      }}>
+    <div className="settings">
+          <div className="danger-button-zone">
+            {dialogContent}
           </div>
-        </Dialog>
-      );
+        </div>
+      </Dialog>);
     }
 
     return (content);
   }
 }
 
-const mapStateToProps = ({players, playersHands, scores, showScores, showSettings, trainColors, view}) =>
-  ({players, playersHands, scores, showScores, showSettings, trainColors, view});
+const mapStateToProps = ({players, playersHands, scores, showGameOptions, showScores, showSettings, trainColors, view}) =>
+  ({players, playersHands, scores, showGameOptions, showScores, showSettings, trainColors, view});
 
 export default connect(mapStateToProps)(BoardDialog);

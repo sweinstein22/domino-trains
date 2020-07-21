@@ -42,6 +42,7 @@ const initialState = {
   players: [],
   round: 12,
   scores: [],
+  showGameOptions: false,
   showScores: false,
   showSettings: false,
   trainColors: [],
