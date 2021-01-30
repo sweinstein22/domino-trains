@@ -5,6 +5,7 @@ Deployed using firebase
 if not already installed, run `npm install -g firebase-tools` to install the firebase CLI tools
 
 login with `firebase login`
+run `yarn build` to create a production build
 run `firebase serve` to serve up the app locally
 run `firebase deploy` to deploy the application
 
