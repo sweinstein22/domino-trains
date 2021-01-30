@@ -30,7 +30,7 @@ class Board extends React.Component {
     let content;
     if (!playerCount || !password) {
       content = (
-        <JoinGameForm {...{password, playerCount}}/>
+        <JoinGameForm {...{password, playerCount, players}}/>
       )
     } else if (players) {
       content = (

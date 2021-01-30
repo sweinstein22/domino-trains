@@ -8,7 +8,7 @@ class JoinGameForm extends React.Component {
     super(props);
     this.state = {
       count: 0,
-      players: [],
+      formPlayers: [],
       countWarning: '',
       password: this.props.password || '',
       passwordWarning: ''
@@ -21,9 +21,9 @@ class JoinGameForm extends React.Component {
     count < 2 || count > 8
       ? this.setState({countWarning: 'Must be between 2 and 8'})
       : this.setState({countWarning: ''});
-    let players = [];
-    players.length = count;
-    this.setState({count, players: Array.from({length: count}).fill('')});
+    let formPlayers = [];
+    formPlayers.length = count;
+    this.setState({count, formPlayers: Array.from({length: count}).fill('')});
   };
 
   setPassword = (event) => {
@@ -40,20 +40,20 @@ class JoinGameForm extends React.Component {
 
   setPlayerNames = (event, index) => {
     event.preventDefault();
-    let {players} = this.state;
-    players[index] = event.target.value;
-    this.setState({players});
+    let {formPlayers} = this.state;
+    formPlayers[index] = event.target.value;
+    this.setState({formPlayers});
   };
 
   submitForm = async () => {
-    const {count, password, players} = this.state;
+    const {count, password, formPlayers} = this.state;
     const {playerCount} = this.props;
 
     if (password === 'choo-choo') {
       if (!playerCount) {
         store.dispatch({type: 'SET', path: ['playerCount'], value: parseInt(count)});
-        store.dispatch({type: 'SET', path: ['players'], value: players});
-        store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: players[0]});
+        store.dispatch({type: 'SET', path: ['players'], value: formPlayers});
+        store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: formPlayers[0]});
         store.dispatch({type: 'SET', path: ['scores'], value: Array.from({length: parseInt(count)}).fill([0])});
         store.generateStartingHands();
       }
@@ -62,45 +62,54 @@ class JoinGameForm extends React.Component {
   };
 
   render() {
-    const {count, players, countWarning, password, passwordWarning} = this.state;
-    const {playerCount} = this.props;
+    const {count, formPlayers, countWarning, password, passwordWarning} = this.state;
+    const {playerCount, players} = this.props;
 
     return (
-      <form className="game-form">
-        {!playerCount && <span>
-          <span>
-          <TextField {...{
-            label: 'Number of Players (Max 8): ', id: 'player-count', value: count,
-            onChange: (event) => this.setCount(event)
-          }}/>
-          <br/>
-            {countWarning}
-            {countWarning && <br/>}
-            <br/>
-        </span>
-          {players.map((val, index) =>
-              <span {...{key: index}}>
+      <div>
+        <form className="game-form">
+          {!playerCount && <span>
+            <span>
             <TextField {...{
-              label: `Player ${index + 1}: `, id: 'player-name', value: players[index],
-              onChange: (event) => this.setPlayerNames(event, index)
+              label: 'Number of Players (Max 8): ', id: 'player-count', value: count,
+              onChange: (event) => this.setCount(event)
             }}/>
             <br/>
+              {countWarning}
+              {countWarning && <br/>}
+              <br/>
           </span>
-          )}
+            {formPlayers.map((val, index) =>
+                <span {...{key: index}}>
+              <TextField {...{
+                label: `Player ${index + 1}: `, id: 'player-name', value: formPlayers[index],
+                onChange: (event) => this.setPlayerNames(event, index)
+              }}/>
+              <br/>
+            </span>
+            )}
+            <br/><br/>
+          </span>}
+          <TextField {...{
+            label: 'Password: ', id: 'password-field', value: password,
+            onChange: (event) => this.setPassword(event)
+          }}/>
+          <br/>
+          {passwordWarning}
+          {passwordWarning && <br/>}
+          <br/>
+          <Button {...{variant: 'outlined', size: 'small', type: 'button', onClick: () => this.submitForm()}}>
+            {playerCount ? 'Join Game' : 'Start Game'}
+          </Button>
+        </form>
+        {playerCount && <span>
+          <br/>
+          Currently Playing: {players.join(', ')}
           <br/><br/>
+            If you're not one of the above players,
+            there's another instance of this game <a href="https://domino-trains-2.web.app/">here</a>
         </span>}
-        <TextField {...{
-          label: 'Password: ', id: 'password-field', value: password,
-          onChange: (event) => this.setPassword(event)
-        }}/>
-        <br/>
-        {passwordWarning}
-        {passwordWarning && <br/>}
-        <br/>
-        <Button {...{variant: 'outlined', size: 'small', type: 'button', onClick: () => this.submitForm()}}>
-          {playerCount ? 'Join Game' : 'Start Game'}
-        </Button>
-      </form>
+      </div>
     );
   };
 }
