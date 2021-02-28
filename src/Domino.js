@@ -20,6 +20,10 @@ export class Domino extends React.Component {
           return index === 5;
         case 11:
           return index === 6;
+        case 13:
+          return index === 7;
+        case 14:
+          return index === 8;
         default:
           return false;
       }
@@ -35,7 +39,8 @@ export class Domino extends React.Component {
     }</span>
   };
 
-  dominoDotClassNames = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+  dominoDotClassNames = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+    'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'];
 
   render() {
     const {value, flipTile, tileIndex, className, selectedIndex} = this.props;

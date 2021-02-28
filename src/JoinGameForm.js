@@ -18,8 +18,8 @@ class JoinGameForm extends React.Component {
   setCount = (event) => {
     event.preventDefault();
     const count = event.target.value;
-    count < 2 || count > 8
-      ? this.setState({countWarning: 'Must be between 2 and 8'})
+    count < 2 || count > 12
+      ? this.setState({countWarning: 'Must be between 2 and 12'})
       : this.setState({countWarning: ''});
     let formPlayers = [];
     formPlayers.length = count;
@@ -71,7 +71,7 @@ class JoinGameForm extends React.Component {
           {!playerCount && <span>
             <span>
             <TextField {...{
-              label: 'Number of Players (Max 8): ', id: 'player-count', value: count,
+              label: 'Number of Players (Max 12): ', id: 'player-count', value: count,
               onChange: (event) => this.setCount(event)
             }}/>
             <br/>

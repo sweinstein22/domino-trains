@@ -2,7 +2,7 @@ import store from './ReduxStore';
 import ServerAPI from "./ServerAPI";
 
 const ServerActions = {
-  endTurn: async () => {
+  endTurn: () => {
     let {players} = store.getState();
     let nextPlayerIndex = store.currentTurnPlayerIndex()+1;
     if (nextPlayerIndex === players.length) {
@@ -11,8 +11,8 @@ const ServerActions = {
     const nextPlayer = players[nextPlayerIndex];
 
     store.dispatch({type: 'SET', path: ['currentTurnPlayer'], value: nextPlayer});
-    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: await ServerAPI.stringifySimpleEndpoints({key})}));
-    ServerAPI.postToServer({key: 'playerState', value: await ServerAPI.stringifyPlayerState({sendAll: false})});
+    ServerAPI.simpleKeyEncodings.map(async key => ServerAPI.postToServer({key, value: ServerAPI.stringifySimpleEndpoints({key})}));
+    ServerAPI.postToServer({key: 'playerState', value: ServerAPI.stringifyPlayerState({sendAll: false})});
   },
 };
 

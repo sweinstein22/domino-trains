@@ -87,6 +87,24 @@
   background-color: darkorchid;
 }
 
+.thirteen .dot {
+  height: 15px;
+  width: 15px;
+  background-color: hotpink;
+}
+
+.fourteen .dot {
+  height: 15px;
+  width: 15px;
+  background-color: crimson;
+}
+
+.fifteen .dot {
+  height: 15px;
+  width: 15px;
+  background-color: khaki;
+}
+
 .tile-controls {
   display: flex;
   justify-content: space-between;

@@ -42,7 +42,7 @@ const TrainActions = {
     return hangingDoubleTrainIndex;
   },
 
-  getTrainColorOptions: () => ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'indigo', 'violet', 'magenta'],
+  getTrainColorOptions: () => ['red', 'coral', 'orange', 'yellow', 'lime-green', 'green', 'teal', 'blue', 'blue-violet', 'indigo', 'violet', 'magenta'],
 
   setTrainColor: (color) => {
     let {trainColors, view} = store.getState();

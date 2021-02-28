@@ -5,6 +5,13 @@
   background-color: #D82600;
 }
 
+.coral svg {
+  color: #f7845e;
+}
+.coral-swatch {
+  background-color: #f7845e;
+}
+
 .orange svg {
   color: #F49E20;
 }
@@ -17,6 +24,13 @@
 }
 .yellow-swatch {
   background-color: #F4EF20;
+}
+
+.lime-green svg {
+  color: #8bbf32;
+}
+.lime-green-swatch {
+  background-color: #8bbf32;
 }
 
 .green svg {
@@ -38,6 +52,13 @@
 }
 .blue-swatch {
   background-color: #16AECD;
+}
+
+.blue-violet svg {
+  color: #4c59ed;
+}
+.blue-violet-swatch {
+  background-color: #4c59ed;
 }
 
 .indigo svg {
