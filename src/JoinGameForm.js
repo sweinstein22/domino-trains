@@ -70,44 +70,45 @@ class JoinGameForm extends React.Component {
         <form className="game-form">
           {!playerCount && <span>
             <span>
-            <TextField {...{
-              label: 'Number of Players (Max 12): ', id: 'player-count', value: count,
-              onChange: (event) => this.setCount(event)
-            }}/>
-            <br/>
-              {countWarning}
-              {countWarning && <br/>}
-              <br/>
-          </span>
-            {formPlayers.map((val, index) =>
-                <span {...{key: index}}>
               <TextField {...{
-                label: `Player ${index + 1}: `, id: 'player-name', value: formPlayers[index],
-                onChange: (event) => this.setPlayerNames(event, index)
-              }}/>
-              <br/>
+                label: 'Number of Players (Max 12): ', id: 'player-count', value: count,
+                onChange: (event) => this.setCount(event)
+              }} />
+              <br />
+              {countWarning}
+              {countWarning && <br />}
+              <br />
             </span>
+            {formPlayers.map((val, index) =>
+              <span {...{key: index}}>
+                <TextField {...{
+                  label: `Player ${index + 1}: `, id: 'player-name', value: formPlayers[index],
+                  onChange: (event) => this.setPlayerNames(event, index)
+                }} />
+                <br />
+              </span>
             )}
-            <br/><br/>
+            <br /><br />
           </span>}
           <TextField {...{
             label: 'Password: ', id: 'password-field', value: password,
             onChange: (event) => this.setPassword(event)
-          }}/>
-          <br/>
+          }} />
+          <br />
           {passwordWarning}
-          {passwordWarning && <br/>}
-          <br/>
+          {passwordWarning && <br />}
+          <br />
           <Button {...{variant: 'outlined', size: 'small', type: 'button', onClick: () => this.submitForm()}}>
             {playerCount ? 'Join Game' : 'Start Game'}
           </Button>
         </form>
         {playerCount && <span>
-          <br/>
+          <br />
           Currently Playing: {players.join(', ')}
-          <br/><br/>
-            If you're not one of the above players,
-            there's another instance of this game <a href="https://domino-trains-2.web.app/">here</a>
+          {/* We now have to pay to host each instance, so I've cut back to one */}
+          {/* <br/><br/> */}
+          {/*   If you're not one of the above players, */}
+          {/*   there's another instance of this game <a href="https://domino-trains-2.web.app/">here</a> */}
         </span>}
       </div>
     );

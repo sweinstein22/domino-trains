@@ -33,8 +33,9 @@ Deployed using Heroku
 login using `heroku login`
 
 if remote tracking is not already set up, run `heroku git:remote -a domino-trains-server`
+(or to switch from another app to target this one, run the same command)
 
-to push app, run `git subtree push --prefix express-server heroku master`
+to push app, run `git subtree push --prefix express-server heroku main`
 
 ## Available Scripts
 
