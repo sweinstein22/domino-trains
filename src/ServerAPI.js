@@ -1,6 +1,7 @@
 import store from './ReduxStore';
 
 const firebase = require("firebase/app");
+require("firebase/database");
 
 const firebaseConfig = {
   apiKey: "AIzaSyCmR4kKqsWz4NNEeaI4wfMLPgbkS8jCb_8",
@@ -18,33 +19,40 @@ const ServerAPI = {
   complexKeyEncodings: ['playerState'],
   simpleKeyEncodings: ['currentTurnPlayer', 'dominosRemaining', 'gameStateMessage', 'playerCount', 'players', 'round', 'scores', 'trains'],
 
-  postToServer: async ({key, value, includeIndex}) => {
-    let returnVal = null;
-    const method = includeIndex ? 'PUT' : 'POST';
-    await fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
-      method,
-      mode: 'cors',
-      body: value,
-      headers: {'Content-Type': 'application/json'}
-    })
-      .catch(e => console.log('Error setting ', key, ':', e));
-    return returnVal;
+  postToServer: async ({key, value}) => {
+    const db = firebase.database();
+    try {
+      if (key === 'reset') {
+        await db.ref('playerCount').set({value: null});
+        await db.ref('round').set({value: 12});
+        await db.ref('playerState').remove();
+        return null;
+      }
+      if (value == null) return null;
+      const body = typeof value === 'string' ? JSON.parse(value) : value;
+      if (key === 'playerState') {
+        if (!(body && body.value)) return null;
+        await db.ref('playerState').update(body.value);
+        return null;
+      }
+      await db.ref(key).set(body);
+    } catch (e) {
+      console.log('Error setting ', key, ':', e);
+    }
+    return null;
   },
 
   getFromServer: async ({key}) => {
     let returnVal = null;
     store.dispatch({type: 'SET', path: ['fetchInProgress'], value: true});
-    await fetch(`https://domino-trains-server.herokuapp.com/${key}`, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {'Content-Type': 'application/json'}
-    })
-      .then(response => response.json())
-      .then(value => {
-        returnVal = value;
-        store.dispatch({type: 'SET', path: ['fetchInProgress'], value: false});
-      })
-      .catch(e => console.log('Error getting ', key, ':', e));
+    try {
+      const snapshot = await firebase.database().ref(key).once('value');
+      returnVal = snapshot.val();
+      if (returnVal == null) returnVal = '';
+    } catch (e) {
+      console.log('Error getting ', key, ':', e);
+    }
+    store.dispatch({type: 'SET', path: ['fetchInProgress'], value: false});
     return returnVal;
   },
 

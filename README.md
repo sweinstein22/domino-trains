@@ -20,22 +20,20 @@ article](https://firebase.googleblog.com/2018/08/one-project-multiple-sites-plus
 (Note: adjustments to the `firebase.json` hosting object to have a separate
 entry for each site and adding targets using the CLI are both necessary steps)
 
-Change the server address and config details in `src/ServerAPI.js`. (Config
-details can be found under settings for the web app, select CDN under the 'Firebase
-SDK Snippet' section)
+Game state for every hosted site lives in the same Realtime Database. A second
+site is the same game unless you point `databaseURL` in `src/ServerAPI.js` at
+another database. Config details are under Project settings for the web app.
 
 Run `firebase deploy --only hosting:domino-trains-x` to deploy to the xth instance of the game
 
-## Deploy server app
+## Game state
 
-Deployed using Heroku
+Stored in Firebase Realtime Database at `https://domino-trains.firebaseio.com`.
+There is no separate server to deploy. `firebase deploy` publishes the client
+and `database.rules.json`.
 
-login using `heroku login`
-
-if remote tracking is not already set up, run `heroku git:remote -a domino-trains-server`
-(or to switch from another app to target this one, run the same command)
-
-to push app, run `git subtree push --prefix express-server heroku main`
+Rules are public read/write. A game is temporary shared state, and the old
+Heroku process had no login either. The `express-server` folder is unused.
 
 ## Available Scripts
 
